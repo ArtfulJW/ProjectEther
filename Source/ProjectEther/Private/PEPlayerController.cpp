@@ -3,6 +3,10 @@
 #include "PEPlayerController.h"
 
 #include "EnhancedInputComponent.h"
+#include "PEPlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+
+class APEPlayerCharacter;
 
 void APEPlayerController::BeginPlay()
 {
@@ -32,6 +36,18 @@ void APEPlayerController::SetupInputComponent()
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 {
+	FVector Direction = Value.Get<FVector>();
+	
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid World"));
+	}
+	
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
+	FTransform PlayerTransform = PC->GetTransform();
+	PC->GetTransform().GetLocation().AddBounded(Direction);
+	
 	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FUCK")));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FUCK: %s"), *Direction.ToString()));
 }
