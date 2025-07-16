@@ -46,7 +46,7 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
 	FTransform PlayerTransform = PC->GetTransform();
-	PC->GetTransform().GetLocation().AddBounded(Direction);
+	PC->AddActorWorldTransform(FTransform(Direction * PC->fSpeed));
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FUCK: %s"), *Direction.ToString()));

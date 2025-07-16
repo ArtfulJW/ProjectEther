@@ -22,6 +22,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	float fSpeed = 1;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
