@@ -32,12 +32,11 @@ void APEPlayerController::SetupInputComponent()
 
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent);
 	Input->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APEPlayerController::MoveEvent);
+	Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APEPlayerController::LookEvent);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 {
-	FVector Direction = Value.Get<FVector>();
-	
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
@@ -45,9 +44,37 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-	FTransform PlayerTransform = PC->GetTransform();
-	PC->AddActorWorldTransform(FTransform(Direction * PC->fSpeed));
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+	}
+	
+	FVector Direction = Value.Get<FVector>();	
+	PC->AddActorLocalTransform(FTransform(Direction * PC->fSpeed));
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FUCK: %s"), *Direction.ToString()));
+}
+
+void APEPlayerController::LookEvent(const FInputActionValue& Value)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid World"));
+	}
+	
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+	}
+
+	FVector InVector = Value.Get<FVector>();
+	
+	PC->AddControllerPitchInput(InVector.Y);
+	PC->AddControllerYawInput(InVector.X);
+	
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *InVector.ToString()));
 }

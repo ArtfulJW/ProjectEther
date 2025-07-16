@@ -28,6 +28,7 @@ protected:
 	UInputMappingContext* InputMapping;
 
 public:
+	
 	/*
 	 * 
 	 */
@@ -37,5 +38,16 @@ public:
 	/*
 	 * 
 	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* LookAction;
+
+	/*
+	 * 
+	 */
 	void MoveEvent(const FInputActionValue& Value);
+
+	/*
+	 * 
+	 */
+	void LookEvent(const FInputActionValue& Value);
 };

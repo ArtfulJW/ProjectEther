@@ -25,10 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	float fSpeed = 1;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera")
 	UCameraComponent* CameraComponent;
 
@@ -37,4 +33,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Root")
 	USceneComponent* RootSceneComponent;
+	
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 };
