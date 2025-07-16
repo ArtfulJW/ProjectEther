@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PEPlayerCharacter.h"
 
+#include "PEPlayerController.h"
+#include "Kismet/GameplayStatics.h"
+
+class APEPlayerController;
 // Sets default values
 APEPlayerCharacter::APEPlayerCharacter()
 {
@@ -15,20 +18,33 @@ APEPlayerCharacter::APEPlayerCharacter()
 void APEPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-// Called to bind functionality to input
 void APEPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	// Super::SetupPlayerInputComponent(PlayerInputComponent);
+	//
+	// UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	// if (!IsValid(Input))
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Invalid UEnhancedInputComponent"));
+	// }
+	//
+	// UWorld* World = GetWorld();
+	// if (!IsValid(World))
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Invalid World"));
+	// }
+	//
+	// APEPlayerController* PC = Cast<APEPlayerController>(UGameplayStatics::GetPlayerController(World, 0));
+	// if (!IsValid(PC))
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Invalid Player Character"));
+	// }
 }
-
