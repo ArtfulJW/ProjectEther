@@ -5,13 +5,15 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInputComponent.h"
+#include "AbilitySystemInterface.h"
+#include "AbilitySystemComponent.h"
 #include "PEPlayerCharacter.generated.h"
 
 /*
  * 
  */
 UCLASS()
-class PROJECTETHER_API APEPlayerCharacter : public ACharacter
+class PROJECTETHER_API APEPlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -22,6 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	float fSpeed = 1;
 
@@ -33,6 +37,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Root")
 	USceneComponent* RootSceneComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
+	UAbilitySystemComponent* AbilitySystemComponent;
 	
 protected:
 	// Called when the game starts or when spawned

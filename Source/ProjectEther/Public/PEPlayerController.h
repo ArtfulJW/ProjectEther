@@ -46,6 +46,9 @@ public:
 	 */
 	void MoveEvent(const FInputActionValue& Value);
 
+	UFUNCTION(Server, Unreliable)
+	void ServerMovePlayer(APEPlayerController* Requester, FVector InVector);
+	
 	/*
 	 * 
 	 */

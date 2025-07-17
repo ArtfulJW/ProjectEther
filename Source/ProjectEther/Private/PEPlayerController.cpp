@@ -12,6 +12,10 @@ void APEPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (GetNetMode() < NM_Client)
+	{
+		return;
+	}
 	
 	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	if (!IsValid(LocalPlayer))
@@ -50,10 +54,12 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	FVector Direction = Value.Get<FVector>();	
-	PC->AddActorLocalTransform(FTransform(Direction * PC->fSpeed));
-	
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FUCK: %s"), *Direction.ToString()));
+	ServerMovePlayer(this, Direction * PC->fSpeed);
+}
+
+void APEPlayerController::ServerMovePlayer_Implementation(APEPlayerController* Requester, FVector InVector)
+{
+	Cast<APEPlayerCharacter>(Requester->GetPawn())->AddActorLocalTransform(FTransform(InVector));
 }
 
 void APEPlayerController::LookEvent(const FInputActionValue& Value)
@@ -74,7 +80,4 @@ void APEPlayerController::LookEvent(const FInputActionValue& Value)
 	
 	PC->AddControllerPitchInput(InVector.Y);
 	PC->AddControllerYawInput(InVector.X);
-	
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *InVector.ToString()));
 }
