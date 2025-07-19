@@ -3,6 +3,7 @@
 #include "PEPlayerController.h"
 
 #include "EnhancedInputComponent.h"
+#include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -54,7 +55,7 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	FVector Direction = Value.Get<FVector>();	
-	ServerMovePlayer(this, Direction * PC->fSpeed);
+	ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed());
 }
 
 void APEPlayerController::ServerMovePlayer_Implementation(APEPlayerController* Requester, FVector InVector)

@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemComponent.h"
+#include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerCharacter.generated.h"
 
 /*
@@ -25,9 +26,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
-	float fSpeed = 1;
+	UAttributeSet* AttributeSet;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera")
 	UCameraComponent* CameraComponent;
@@ -40,6 +41,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
 	UAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	UDataTable* DataTable;
 	
 protected:
 	// Called when the game starts or when spawned
