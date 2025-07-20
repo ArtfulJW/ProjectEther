@@ -17,13 +17,22 @@ class PROJECTETHER_API UPEBaseCharacterAttributeSet : public UAttributeSet
 
 protected:
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Health, Category = "Character Specs")
 	FGameplayAttributeData Health;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Speed, Category = "Character Specs")
 	FGameplayAttributeData Speed;
 
 public:
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_Health(const FGameplayAttributeData& OldHealth);
+
+	UFUNCTION()
+	void OnRep_Speed(const FGameplayAttributeData& OldSpeed);
+	
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, Health);
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(Health);
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(Health);

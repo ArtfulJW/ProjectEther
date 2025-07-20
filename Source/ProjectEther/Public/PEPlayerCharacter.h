@@ -24,12 +24,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
-	UAttributeSet* AttributeSet;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera")
 	UCameraComponent* CameraComponent;
 
@@ -39,11 +36,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Root")
 	USceneComponent* RootSceneComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	UAttributeSet* AttributeSet;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	UDataTable* DataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> AbilityOne;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle AbilityOneHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> AbilityTwo;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle AbilityTwoHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> AbilityThree;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle AbilityThreeHandle;
 	
 protected:
 	// Called when the game starts or when spawned

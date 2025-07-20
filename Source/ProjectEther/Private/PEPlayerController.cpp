@@ -38,6 +38,7 @@ void APEPlayerController::SetupInputComponent()
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent);
 	Input->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APEPlayerController::MoveEvent);
 	Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APEPlayerController::LookEvent);
+	Input->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseAbilityEvent);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -81,4 +82,40 @@ void APEPlayerController::LookEvent(const FInputActionValue& Value)
 	
 	PC->AddControllerPitchInput(InVector.Y);
 	PC->AddControllerYawInput(InVector.X);
+}
+
+void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	
+	if (PlayerInput->IsPressed(EKeys::Two))
+	{
+		ServerUseAbilityOneEvent(this);
+	}
+	
+	if (PlayerInput->IsPressed(EKeys::Three))
+	{
+		ServerUseAbilityTwoEvent(this);
+	}
+	
+	if (PlayerInput->IsPressed(EKeys::Four))
+	{
+		ServerUseAbilityThreeEvent(this);
+	}
+}
+
+void APEPlayerController::ServerUseAbilityOneEvent_Implementation(APEPlayerController* Requester)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityOneHandle);
+}
+
+void APEPlayerController::ServerUseAbilityTwoEvent_Implementation(APEPlayerController* Requester)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (2)"), *Requester->GetName())
+}
+
+void APEPlayerController::ServerUseAbilityThreeEvent_Implementation(APEPlayerController* Requester)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (3)"), *Requester->GetName())
 }

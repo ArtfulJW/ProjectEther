@@ -3,6 +3,8 @@
 #include "PEPlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PETestGameplayAbility.h"
+#include "Net/UnrealNetwork.h"
 
 APEPlayerCharacter::APEPlayerCharacter()
 {
@@ -12,8 +14,7 @@ APEPlayerCharacter::APEPlayerCharacter()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AttributeSet = CreateDefaultSubobject<UPEBaseCharacterAttributeSet>(TEXT("AttributeSet"));
-
-	// RootComponent = RootSceneComponent;
+	
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	CameraComponent->SetupAttachment(RootComponent);
 }
@@ -41,6 +42,13 @@ void APEPlayerCharacter::BeginPlay()
 	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Finding"))->BaseValue;
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed); 
 	UE_LOG(LogTemp, Warning, TEXT("My speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
+
+	if (GetNetMode() < NM_Client)
+	{
+		AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOne);
+		AbilityTwoHandle = AbilitySystemComponent->GiveAbility(AbilityTwo);
+		AbilityThreeHandle = AbilitySystemComponent->GiveAbility(AbilityThree);
+	}
 }
 
 // Called every frame

@@ -29,28 +29,30 @@ protected:
 
 public:
 	
-	/*
-	 * 
-	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* MoveAction;
-
-	/*
-	 * 
-	 */
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* LookAction;
 
-	/*
-	 * 
-	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* AbilityAction;
+	
 	void MoveEvent(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Unreliable)
 	void ServerMovePlayer(APEPlayerController* Requester, FVector InVector);
 	
-	/*
-	 * 
-	 */
 	void LookEvent(const FInputActionValue& Value);
+
+	void UseAbilityEvent(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerUseAbilityOneEvent(APEPlayerController* Requester);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerUseAbilityTwoEvent(APEPlayerController* Requester);
+	
+	UFUNCTION(Server, Unreliable)
+	void ServerUseAbilityThreeEvent(APEPlayerController* Requester);
 };
