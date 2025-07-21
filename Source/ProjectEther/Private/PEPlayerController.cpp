@@ -112,10 +112,14 @@ void APEPlayerController::ServerUseAbilityOneEvent_Implementation(APEPlayerContr
 
 void APEPlayerController::ServerUseAbilityTwoEvent_Implementation(APEPlayerController* Requester)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (2)"), *Requester->GetName())
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityTwoHandle);
+	// UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (2)"), *Requester->GetName())
 }
 
 void APEPlayerController::ServerUseAbilityThreeEvent_Implementation(APEPlayerController* Requester)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (3)"), *Requester->GetName())
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityThreeHandle);
+	// UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (3)"), *Requester->GetName())
 }

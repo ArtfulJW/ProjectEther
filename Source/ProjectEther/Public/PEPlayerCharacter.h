@@ -46,22 +46,36 @@ public:
 	UDataTable* DataTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> AbilityOne;
+	TSubclassOf<UGameplayAbility> PassiveAbility;
+
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle PassiveAbilityHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> WeaponAbility;
+
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle WeaponAbilityHandle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> AbilityOne;
+	
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityOneHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityTwo;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityTwoHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityThree;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
+
+	void CalculateDamageDirection(FVector InVector);
 	
 protected:
 	// Called when the game starts or when spawned
