@@ -10,6 +10,25 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EDamageDirection
+{
+	Front,
+	Side,
+	Back
+};
+
+inline FString EDamageDirection_ToString(EDamageDirection e)
+{
+	switch (e)
+	{
+		case EDamageDirection::Front: return "Front";
+		case EDamageDirection::Side: return "Side";
+		case EDamageDirection::Back: return "Back";
+		default: throw std::invalid_argument("Unimplemented DamageDirection");
+	}
+}
+
 /*
  * 
  */
@@ -75,7 +94,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
 
-	void CalculateDamageDirection(FVector InVector);
+	EDamageDirection DetermineDamageDirection(FVector InVector) const;
 	
 protected:
 	// Called when the game starts or when spawned

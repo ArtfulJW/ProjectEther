@@ -4,6 +4,8 @@
 #include "AbilitySystemComponent.h"
 #include "PEBaseCharacterAttributeSet.h"
 #include "PETestGameplayAbility.h"
+#include "SNegativeActionButton.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -30,11 +32,13 @@ UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-void APEPlayerCharacter::CalculateDamageDirection(FVector InVector)
+EDamageDirection APEPlayerCharacter::DetermineDamageDirection(FVector InVector) const
 {
 	InVector = InVector + GetActorLocation();
 	FVector ForwardVector = GetActorLocation() + GetActorForwardVector() * 100;
 
+	InVector.Z = GetActorLocation().Z;
+	
 	InVector = UKismetMathLibrary::InverseTransformLocation(GetActorTransform(), InVector);
 	ForwardVector = UKismetMathLibrary::InverseTransformLocation(GetActorTransform(), ForwardVector);
 	
@@ -47,19 +51,25 @@ void APEPlayerCharacter::CalculateDamageDirection(FVector InVector)
 	// DrawDebugSphere(GetWorld(), ForwardVector, 15,  16, FColor::Blue);
 	// DrawDebugLine(GetWorld(), GetActorLocation(), InVector, FColor::Red);
 	// DrawDebugLine(GetWorld(), GetActorLocation(), ForwardVector, FColor::Blue);
-	
+
+	EDamageDirection DamageDirection = {};
 	if (Angle <= 45.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage from front: %f"), Angle);
+		// UE_LOG(LogTemp, Warning, TEXT("Damage from front: %f"), Angle);
+		DamageDirection = EDamageDirection::Front;
 	}
-	else if (Angle >= 45.0f && Angle <= 135.0f)
+	if (Angle >= 45.0f && Angle <= 135.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage from sides: %f"), Angle);
+		// UE_LOG(LogTemp, Warning, TEXT("Damage from sides: %f"), Angle);
+		DamageDirection = EDamageDirection::Side;
 	}
-	else if (Angle >= 135.0f && Angle <= 180.0f)
+	if (Angle >= 135.0f && Angle <= 180.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage from back: %f"), Angle);
+		// UE_LOG(LogTemp, Warning, TEXT("Damage from back: %f"), Angle);
+		DamageDirection = EDamageDirection::Back;
 	}
+
+	return DamageDirection;
 }
 
 // Called when the game starts or when spawned
@@ -90,5 +100,6 @@ void APEPlayerCharacter::BeginPlay()
 void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	CalculateDamageDirection(FVector(30,0,0));
+	EDamageDirection Direction = DetermineDamageDirection(FVector(200,0,0));
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *EDamageDirection_ToString(Direction))
 }
