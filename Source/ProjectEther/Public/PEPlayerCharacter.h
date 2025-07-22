@@ -7,7 +7,9 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PEPlayerHUD.h"
 #include "PEPlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -94,6 +96,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
+	TSubclassOf<UPEPlayerHUD> HUDClass;
+
+	UPEPlayerHUD* PlayerHUD;
+	
 	EDamageDirection DetermineDamageDirection(FVector InVector) const;
 	
 protected:

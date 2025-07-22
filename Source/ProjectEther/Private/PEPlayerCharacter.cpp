@@ -3,6 +3,7 @@
 #include "PEPlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PEPlayerController.h"
 #include "PETestGameplayAbility.h"
 #include "SNegativeActionButton.h"
 #include "Kismet/GameplayStatics.h"
@@ -77,15 +78,29 @@ void APEPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (IsValid(AbilitySystemComponent))
+	if (!IsValid(AbilitySystemComponent))
 	{
-		
+		UE_LOG(LogTemp, Warning, TEXT("Invalid AbilitySystemComponent"))
 	}
 	
 	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Finding"))->BaseValue;
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed); 
 	UE_LOG(LogTemp, Warning, TEXT("My speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
 
+	if (!IsValid(HUDClass))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid HUDClass"))
+	}
+	
+	if (IsLocallyControlled())
+	{
+		APEPlayerController* PC = Cast<APEPlayerController>(GetController());
+		ensureMsgf(PC, TEXT("Was not able to reference PlayerController"));
+		PlayerHUD = CreateWidget<UPEPlayerHUD>(PC, HUDClass);
+		ensureMsgf(PlayerHUD, TEXT("PlayerHUD failed to instantiate properly"));
+		PlayerHUD->AddToViewport();
+	}
+	
 	if (GetNetMode() < NM_Client)
 	{
 		PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbility);
