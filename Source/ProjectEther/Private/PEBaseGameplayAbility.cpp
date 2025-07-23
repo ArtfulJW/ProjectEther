@@ -34,10 +34,25 @@ void UPETestGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	if (HitActor && PC->GetController() != HitPlayerController)
 	{
 		UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
-		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1);
-
 		EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
+		float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
+		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
 	
 		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection));
+	}
+}
+
+float UPETestGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection) const
+{
+	switch (DamageDirection)
+	{
+		case EDamageDirection::Front:
+			return 1.0f;
+		case EDamageDirection::Side:
+			return 1.5f;
+		case EDamageDirection::Back:
+			return 2.0f;
+		default:
+			return 0.0f;
 	}
 }
