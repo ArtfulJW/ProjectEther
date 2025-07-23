@@ -79,10 +79,23 @@ EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& 
 void APEPlayerCharacter::BeforeDestroy()
 {
 	UWorld* World = GetWorld();
-	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetController());
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+	
 	ASpectatorPawn* SpectatorPawn = World->SpawnActor<ASpectatorPawn>(PlayerController->PESpectatorPawn);
-	// APEPlayerCharacter* SpectatorPawn = World->SpawnActor<APEPlayerCharacter>(APEPlayerCharacter::StaticClass());
+	if (!IsValid(SpectatorPawn))
+	{
+		return;
+	}
+	
 	SpectatorPawn->SetActorLocation(GetActorLocation());
 	PlayerController->Possess(SpectatorPawn);
 }
@@ -122,7 +135,8 @@ void APEPlayerCharacter::BeginPlay()
 	if (GetNetMode() < NM_Client)
 	{
 		PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbility);
-		WeaponAbilityHandle = AbilitySystemComponent->GiveAbility(WeaponAbility);
+		WeaponAbilityOneHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityOne);
+		WeaponAbilityTwoHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityTwo);
 		AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOne);
 		AbilityTwoHandle = AbilitySystemComponent->GiveAbility(AbilityTwo);
 		AbilityThreeHandle = AbilitySystemComponent->GiveAbility(AbilityThree);

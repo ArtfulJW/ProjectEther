@@ -3,8 +3,10 @@
 #include "PEPlayerController.h"
 
 #include "EnhancedInputComponent.h"
+#include "InputState.h"
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerCharacter.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 
 class APEPlayerCharacter;
@@ -39,6 +41,7 @@ void APEPlayerController::SetupInputComponent()
 	Input->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APEPlayerController::MoveEvent);
 	Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APEPlayerController::LookEvent);
 	Input->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseAbilityEvent);
+	Input->BindAction(WeaponAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseWeaponEvent);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -64,6 +67,11 @@ void APEPlayerController::ServerMovePlayer_Implementation(APEPlayerController* R
 
 void APEPlayerController::LookEvent(const FInputActionValue& Value)
 {
+	if (IsPossessingSpectatorPawn(this))
+	{
+		return;
+	}
+	
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
@@ -76,12 +84,22 @@ void APEPlayerController::LookEvent(const FInputActionValue& Value)
 		FVector InVector = Value.Get<FVector>();
 		PC->AddControllerPitchInput(InVector.Y);
 		PC->AddControllerYawInput(InVector.X);
+		ServerLookEvent(this, PC->CameraComponent->GetRelativeRotation());
 	}
+}
+
+void APEPlayerController::ServerLookEvent_Implementation(APEPlayerController* Requester, FRotator InRotator)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	PC->CameraComponent->SetRelativeRotation(InRotator);
 }
 
 void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
 {
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (IsPossessingSpectatorPawn(this))
+	{
+		return;
+	}
 	
 	if (PlayerInput->IsPressed(EKeys::Two))
 	{
@@ -99,6 +117,40 @@ void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
 	}
 }
 
+void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
+{
+	if (IsPossessingSpectatorPawn(this))
+	{
+		return;
+	}
+	
+	if (PlayerInput->IsPressed(EKeys::LeftMouseButton))
+	{
+		ServerUseWeaponOneAbilityEvent(this);
+	}
+	if (PlayerInput->IsPressed(EKeys::RightMouseButton))
+	{
+		ServerUseWeaponTwoAbilityEvent(this);
+	}
+}
+
+bool APEPlayerController::IsPossessingSpectatorPawn(APEPlayerController* Requester)
+{
+	return  Requester->GetPawn()->IsA(ASpectatorPawn::StaticClass());
+}
+
+void APEPlayerController::ServerUseWeaponTwoAbilityEvent_Implementation(APEPlayerController* Requester)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(PC->WeaponAbilityTwoHandle);
+}
+
+void APEPlayerController::ServerUseWeaponOneAbilityEvent_Implementation(APEPlayerController* Requester)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(PC->WeaponAbilityOneHandle);
+}
+
 void APEPlayerController::ServerUseAbilityOneEvent_Implementation(APEPlayerController* Requester)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
@@ -109,12 +161,10 @@ void APEPlayerController::ServerUseAbilityTwoEvent_Implementation(APEPlayerContr
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
 	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityTwoHandle);
-	// UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (2)"), *Requester->GetName())
 }
 
 void APEPlayerController::ServerUseAbilityThreeEvent_Implementation(APEPlayerController* Requester)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
 	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityThreeHandle);
-	// UE_LOG(LogTemp, Warning, TEXT("%s: Executed Ability (3)"), *Requester->GetName())
 }

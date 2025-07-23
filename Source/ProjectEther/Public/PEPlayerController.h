@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* AbilityAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* WeaponAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 	
@@ -48,6 +51,9 @@ public:
 	
 	void LookEvent(const FInputActionValue& Value);
 
+	UFUNCTION(Server, Unreliable)
+	void ServerLookEvent(APEPlayerController* Requester, FRotator InRotator);
+	
 	void UseAbilityEvent(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Unreliable)
@@ -58,4 +64,14 @@ public:
 	
 	UFUNCTION(Server, Unreliable)
 	void ServerUseAbilityThreeEvent(APEPlayerController* Requester);
+
+	void UseWeaponEvent(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerUseWeaponOneAbilityEvent(APEPlayerController* Requester);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerUseWeaponTwoAbilityEvent(APEPlayerController* Requester);
+
+	bool IsPossessingSpectatorPawn(APEPlayerController* Requester);
 };

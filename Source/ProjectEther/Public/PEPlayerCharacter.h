@@ -73,10 +73,16 @@ public:
 	FGameplayAbilitySpecHandle PassiveAbilityHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> WeaponAbility;
+	TSubclassOf<UGameplayAbility> WeaponAbilityOne;
 
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
-	FGameplayAbilitySpecHandle WeaponAbilityHandle;
+	FGameplayAbilitySpecHandle WeaponAbilityOneHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayAbility> WeaponAbilityTwo;
+
+	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	FGameplayAbilitySpecHandle WeaponAbilityTwoHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityOne;
