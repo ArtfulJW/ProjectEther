@@ -33,15 +33,15 @@ UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-EDamageDirection APEPlayerCharacter::DetermineDamageDirection(FVector InVector) const
+EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& HitResult) const
 {
-	InVector = InVector + GetActorLocation();
-	FVector ForwardVector = GetActorLocation() + GetActorForwardVector() * 100;
-
+	const AActor* HitActor = HitResult.GetActor();
+	FVector InVector = HitResult.Location;
+	FVector ForwardVector = HitActor->GetActorLocation() + HitActor->GetActorForwardVector() * 100;
 	InVector.Z = GetActorLocation().Z;
 	
-	InVector = UKismetMathLibrary::InverseTransformLocation(GetActorTransform(), InVector);
-	ForwardVector = UKismetMathLibrary::InverseTransformLocation(GetActorTransform(), ForwardVector);
+	InVector = UKismetMathLibrary::InverseTransformLocation(HitActor->GetTransform(), InVector);
+	ForwardVector = UKismetMathLibrary::InverseTransformLocation(HitActor->GetTransform(), ForwardVector);
 	
 	float DotProduct = FVector::DotProduct(InVector, ForwardVector);
 	float Angle = FMath::Acos(DotProduct / (InVector.Size() * ForwardVector.Size()));
@@ -59,12 +59,12 @@ EDamageDirection APEPlayerCharacter::DetermineDamageDirection(FVector InVector) 
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from front: %f"), Angle);
 		DamageDirection = EDamageDirection::Front;
 	}
-	if (Angle >= 45.0f && Angle <= 135.0f)
+	else if (Angle >= 45.0f && Angle <= 135.0f)
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from sides: %f"), Angle);
 		DamageDirection = EDamageDirection::Side;
 	}
-	if (Angle >= 135.0f && Angle <= 180.0f)
+	else if (Angle >= 135.0f && Angle <= 180.0f)
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from back: %f"), Angle);
 		DamageDirection = EDamageDirection::Back;
@@ -115,6 +115,6 @@ void APEPlayerCharacter::BeginPlay()
 void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	EDamageDirection Direction = DetermineDamageDirection(FVector(200,0,0));
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *EDamageDirection_ToString(Direction))
+	// EDamageDirection Direction = DetermineDamageDirection(FVector(200,0,0));
+	// UE_LOG(LogTemp, Warning, TEXT("%s"), *EDamageDirection_ToString(Direction))
 }

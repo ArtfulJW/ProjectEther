@@ -101,7 +101,7 @@ public:
 
 	UPEPlayerHUD* PlayerHUD;
 	
-	EDamageDirection DetermineDamageDirection(FVector InVector) const;
+	EDamageDirection DetermineDamageDirection(const FHitResult& HitResult) const;
 	
 protected:
 	// Called when the game starts or when spawned
