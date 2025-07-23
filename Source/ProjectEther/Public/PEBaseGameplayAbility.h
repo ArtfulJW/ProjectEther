@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "PEPlayerCharacter.h"
 #include "Abilities/GameplayAbility.h"
-#include "PETestGameplayAbility.generated.h"
+#include "PEBaseGameplayAbility.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTETHER_API UPETestGameplayAbility : public UGameplayAbility
+class PROJECTETHER_API UPEBaseGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 public:

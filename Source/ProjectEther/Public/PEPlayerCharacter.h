@@ -102,6 +102,8 @@ public:
 	UPEPlayerHUD* PlayerHUD;
 	
 	EDamageDirection DetermineDamageDirection(const FHitResult& HitResult) const;
+
+	void BeforeDestroy();
 	
 protected:
 	// Called when the game starts or when spawned

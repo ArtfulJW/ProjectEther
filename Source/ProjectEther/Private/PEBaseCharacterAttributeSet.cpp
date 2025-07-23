@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PEBaseCharacterAttributeSet.h"
 
+#include "PEPlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 void UPEBaseCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -21,4 +21,16 @@ void UPEBaseCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& Ol
 void UPEBaseCharacterAttributeSet::OnRep_Speed(const FGameplayAttributeData& OldSpeed)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, Health, OldSpeed);
+}
+
+void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
+	Health = InHealth;
+
+	if (Health.GetCurrentValue() <= 0.0f)
+	{
+		PC->BeforeDestroy();
+		PC->Destroy();
+	}
 }

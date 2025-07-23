@@ -4,8 +4,11 @@
 #include "AbilitySystemComponent.h"
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerController.h"
-#include "PETestGameplayAbility.h"
+#include "PEBaseGameplayAbility.h"
 #include "SNegativeActionButton.h"
+#include "EntitySystem/MovieSceneEntitySystemRunner.h"
+#include "GameFramework/GameMode.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -73,6 +76,17 @@ EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& 
 	return DamageDirection;
 }
 
+void APEPlayerCharacter::BeforeDestroy()
+{
+	UWorld* World = GetWorld();
+	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetController());
+	ASpectatorPawn* SpectatorPawn = World->SpawnActor<ASpectatorPawn>(PlayerController->PESpectatorPawn);
+	// APEPlayerCharacter* SpectatorPawn = World->SpawnActor<APEPlayerCharacter>(APEPlayerCharacter::StaticClass());
+	SpectatorPawn->SetActorLocation(GetActorLocation());
+	PlayerController->Possess(SpectatorPawn);
+}
+
 // Called when the game starts or when spawned
 void APEPlayerCharacter::BeginPlay()
 {
@@ -84,8 +98,12 @@ void APEPlayerCharacter::BeginPlay()
 	}
 	
 	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Finding"))->BaseValue;
-	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed); 
-	UE_LOG(LogTemp, Warning, TEXT("My speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
+	float InHealth = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Health"), TEXT("Finding"))->BaseValue;
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetHealth(InHealth);
+	
+	UE_LOG(LogTemp, Warning, TEXT("My Speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
+	UE_LOG(LogTemp, Warning, TEXT("My Health is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetHealth())
 
 	if (!IsValid(HUDClass))
 	{

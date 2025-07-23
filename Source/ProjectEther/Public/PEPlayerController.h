@@ -37,6 +37,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* AbilityAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
+	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 	
 	void MoveEvent(const FInputActionValue& Value);
 

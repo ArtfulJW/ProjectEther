@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PETestGameplayAbility.h"
+#include "PEBaseGameplayAbility.h"
 
 #include "CollisionDebugDrawingPublic.h"
 #include "KismetTraceUtils.h"
 #include "PEPlayerCharacter.h"
 #include "PEPlayerController.h"
 
-void UPETestGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                              const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                              const FGameplayEventData* TriggerEventData)
 {
@@ -38,11 +38,11 @@ void UPETestGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
 		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
 	
-		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection));
+		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
 	}
 }
 
-float UPETestGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection) const
+float UPEBaseGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection) const
 {
 	switch (DamageDirection)
 	{

@@ -50,13 +50,11 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-	if (!IsValid(PC))
+	if (IsValid(PC))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+		FVector Direction = Value.Get<FVector>();	
+		ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed());
 	}
-	
-	FVector Direction = Value.Get<FVector>();	
-	ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed());
 }
 
 void APEPlayerController::ServerMovePlayer_Implementation(APEPlayerController* Requester, FVector InVector)
@@ -72,16 +70,13 @@ void APEPlayerController::LookEvent(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("Invalid World"));
 	}
 	
-	ACharacter* PC = Cast<ACharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-	if (!IsValid(PC))
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
+	if (IsValid(PC))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+		FVector InVector = Value.Get<FVector>();
+		PC->AddControllerPitchInput(InVector.Y);
+		PC->AddControllerYawInput(InVector.X);
 	}
-
-	FVector InVector = Value.Get<FVector>();
-	
-	PC->AddControllerPitchInput(InVector.Y);
-	PC->AddControllerYawInput(InVector.X);
 }
 
 void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
