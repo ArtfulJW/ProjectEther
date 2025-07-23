@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "InputMappingContext.h"
 #include "PEPlayerController.generated.h"
 
@@ -57,21 +58,9 @@ public:
 	void UseAbilityEvent(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerUseAbilityOneEvent(APEPlayerController* Requester);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerUseAbilityTwoEvent(APEPlayerController* Requester);
-	
-	UFUNCTION(Server, Unreliable)
-	void ServerUseAbilityThreeEvent(APEPlayerController* Requester);
+	void ServerUseGameplayAbilityEvent(APEPlayerController* Requester, FGameplayAbilitySpecHandle AbilityHandle);
 
 	void UseWeaponEvent(const FInputActionValue& Value);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerUseWeaponOneAbilityEvent(APEPlayerController* Requester);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerUseWeaponTwoAbilityEvent(APEPlayerController* Requester);
 
 	bool IsPossessingSpectatorPawn(APEPlayerController* Requester);
 };

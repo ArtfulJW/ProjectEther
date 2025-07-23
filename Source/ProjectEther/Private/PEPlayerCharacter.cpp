@@ -36,6 +36,17 @@ UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEPlayerCharacter, AbilityOneHandle);
+	DOREPLIFETIME(APEPlayerCharacter, AbilityTwoHandle);
+	DOREPLIFETIME(APEPlayerCharacter, AbilityThreeHandle);
+	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityOneHandle);
+	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityTwoHandle);
+}
+
 EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& HitResult) const
 {
 	const AActor* HitActor = HitResult.GetActor();

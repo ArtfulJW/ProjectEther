@@ -100,21 +100,29 @@ void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
 	{
 		return;
 	}
-	
+
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
 	if (PlayerInput->IsPressed(EKeys::Two))
 	{
-		ServerUseAbilityOneEvent(this);
+		ServerUseGameplayAbilityEvent(this, PC->AbilityOneHandle);
 	}
 	
 	if (PlayerInput->IsPressed(EKeys::Three))
 	{
-		ServerUseAbilityTwoEvent(this);
+		ServerUseGameplayAbilityEvent(this, PC->AbilityTwoHandle);
 	}
 	
 	if (PlayerInput->IsPressed(EKeys::Four))
 	{
-		ServerUseAbilityThreeEvent(this);
+		ServerUseGameplayAbilityEvent(this, PC->AbilityThreeHandle);
 	}
+}
+
+void APEPlayerController::ServerUseGameplayAbilityEvent_Implementation(APEPlayerController* Requester,
+	FGameplayAbilitySpecHandle AbilityHandle)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	PC->AbilitySystemComponent->TryActivateAbility(AbilityHandle);
 }
 
 void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
@@ -123,48 +131,19 @@ void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
 	{
 		return;
 	}
-	
+
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
 	if (PlayerInput->IsPressed(EKeys::LeftMouseButton))
 	{
-		ServerUseWeaponOneAbilityEvent(this);
+		ServerUseGameplayAbilityEvent(this, PC->WeaponAbilityOneHandle);
 	}
 	if (PlayerInput->IsPressed(EKeys::RightMouseButton))
 	{
-		ServerUseWeaponTwoAbilityEvent(this);
+		ServerUseGameplayAbilityEvent(this, PC->WeaponAbilityTwoHandle);
 	}
 }
 
 bool APEPlayerController::IsPossessingSpectatorPawn(APEPlayerController* Requester)
 {
 	return  Requester->GetPawn()->IsA(ASpectatorPawn::StaticClass());
-}
-
-void APEPlayerController::ServerUseWeaponTwoAbilityEvent_Implementation(APEPlayerController* Requester)
-{
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
-	PC->AbilitySystemComponent->TryActivateAbility(PC->WeaponAbilityTwoHandle);
-}
-
-void APEPlayerController::ServerUseWeaponOneAbilityEvent_Implementation(APEPlayerController* Requester)
-{
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
-	PC->AbilitySystemComponent->TryActivateAbility(PC->WeaponAbilityOneHandle);
-}
-
-void APEPlayerController::ServerUseAbilityOneEvent_Implementation(APEPlayerController* Requester)
-{
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
-	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityOneHandle);
-}
-
-void APEPlayerController::ServerUseAbilityTwoEvent_Implementation(APEPlayerController* Requester)
-{
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
-	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityTwoHandle);
-}
-
-void APEPlayerController::ServerUseAbilityThreeEvent_Implementation(APEPlayerController* Requester)
-{
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
-	PC->AbilitySystemComponent->TryActivateAbility(PC->AbilityThreeHandle);
 }

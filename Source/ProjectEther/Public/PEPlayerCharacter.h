@@ -47,6 +47,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera")
 	UCameraComponent* CameraComponent;
@@ -75,31 +77,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> WeaponAbilityOne;
 
-	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle WeaponAbilityOneHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> WeaponAbilityTwo;
 
-	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle WeaponAbilityTwoHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityOne;
 	
-	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityOneHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityTwo;
 	
-	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityTwoHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
 	TSubclassOf<UGameplayAbility> AbilityThree;
 	
-	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
