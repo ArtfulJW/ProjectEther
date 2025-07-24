@@ -108,10 +108,19 @@ public:
 	TSubclassOf<UPEPlayerHUD> HUDClass;
 
 	UPEPlayerHUD* PlayerHUD;
+
+	bool bIsCarryingEther;
+
+	bool bIsLookingAtEther;
+	
+	UFUNCTION(Client, Unreliable)
+	void ClientRemovePlayerHUD();
 	
 	EDamageDirection DetermineDamageDirection(const FHitResult& HitResult) const;
 
 	void BeforeDestroy();
+
+	void IsLookingAtEther();
 	
 protected:
 	// Called when the game starts or when spawned

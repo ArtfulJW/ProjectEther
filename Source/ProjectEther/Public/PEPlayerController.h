@@ -42,6 +42,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* WeaponAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* InteractAction;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 	
@@ -63,4 +66,6 @@ public:
 	void UseWeaponEvent(const FInputActionValue& Value);
 
 	bool IsPossessingSpectatorPawn(APEPlayerController* Requester);
+
+	void InteractEvent();
 };

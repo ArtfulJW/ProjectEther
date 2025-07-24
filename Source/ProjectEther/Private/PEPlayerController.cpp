@@ -42,6 +42,7 @@ void APEPlayerController::SetupInputComponent()
 	Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APEPlayerController::LookEvent);
 	Input->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseAbilityEvent);
 	Input->BindAction(WeaponAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseWeaponEvent);
+	Input->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APEPlayerController::InteractEvent);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -146,4 +147,18 @@ void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
 bool APEPlayerController::IsPossessingSpectatorPawn(APEPlayerController* Requester)
 {
 	return  Requester->GetPawn()->IsA(ASpectatorPawn::StaticClass());
+}
+
+void APEPlayerController::InteractEvent()
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+	
+	if (PC->bIsLookingAtEther)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Looking at Ether"));
+	}
 }

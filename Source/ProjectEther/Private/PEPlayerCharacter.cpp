@@ -5,7 +5,9 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerController.h"
 #include "PEBaseGameplayAbility.h"
+#include "PEEther.h"
 #include "SNegativeActionButton.h"
+#include "Components/TextBlock.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GameFramework/GameMode.h"
 #include "GameFramework/SpectatorPawn.h"
@@ -13,7 +15,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
-APEPlayerCharacter::APEPlayerCharacter()
+APEPlayerCharacter::APEPlayerCharacter():
+	bIsCarryingEther(false),
+	bIsLookingAtEther(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,6 +49,11 @@ void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME(APEPlayerCharacter, AbilityThreeHandle);
 	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityOneHandle);
 	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityTwoHandle);
+}
+
+void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
+{
+	PlayerHUD->RemoveFromParent();
 }
 
 EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& HitResult) const
@@ -106,9 +115,44 @@ void APEPlayerCharacter::BeforeDestroy()
 	{
 		return;
 	}
+
+	APEPlayerCharacter* PlayerCharacter = Cast<APEPlayerCharacter>(PlayerController->GetPawn());
+	if (!IsValid(PlayerCharacter))
+	{
+		return;
+	}
 	
+	PlayerCharacter->ClientRemovePlayerHUD();
 	SpectatorPawn->SetActorLocation(GetActorLocation());
 	PlayerController->Possess(SpectatorPawn);
+}
+
+void APEPlayerCharacter::IsLookingAtEther()
+{
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	AActor* Actor = Hit.GetActor();
+
+	if (!IsValid(PlayerHUD))
+	{
+		return;
+	}
+
+	if (!IsValid(Actor))
+	{
+		return;
+	}
+	
+	UTextBlock* TextBlock =  Cast<UTextBlock>(PlayerHUD->GetWidgetFromName(FName("InteractTextBlock")));
+	bIsLookingAtEther = Actor->IsA(APEEther::StaticClass());
+	if (bIsLookingAtEther)
+	{
+		TextBlock->SetText(FText::FromString("Press 'E' to interact"));
+	}
+	else
+	{
+		TextBlock->SetText(FText::FromString(""));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -158,6 +202,5 @@ void APEPlayerCharacter::BeginPlay()
 void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// EDamageDirection Direction = DetermineDamageDirection(FVector(200,0,0));
-	// UE_LOG(LogTemp, Warning, TEXT("%s"), *EDamageDirection_ToString(Direction))
+	IsLookingAtEther();
 }
