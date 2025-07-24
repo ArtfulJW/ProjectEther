@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InteractableInterface.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "PEEther.generated.h"
 
 UCLASS()
-class PROJECTETHER_API APEEther : public AActor
+class PROJECTETHER_API APEEther : public AActor, public IInteractableInterface
 {
 	GENERATED_BODY()
 	

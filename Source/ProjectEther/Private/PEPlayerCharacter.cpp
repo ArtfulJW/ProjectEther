@@ -144,7 +144,8 @@ void APEPlayerCharacter::IsLookingAtEther()
 	}
 	
 	UTextBlock* TextBlock =  Cast<UTextBlock>(PlayerHUD->GetWidgetFromName(FName("InteractTextBlock")));
-	bIsLookingAtEther = Actor->IsA(APEEther::StaticClass());
+	// bIsLookingAtEther = Actor->IsA(APEEther::StaticClass());
+	bIsLookingAtEther = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
 	if (bIsLookingAtEther)
 	{
 		TextBlock->SetText(FText::FromString("Press 'E' to interact"));
