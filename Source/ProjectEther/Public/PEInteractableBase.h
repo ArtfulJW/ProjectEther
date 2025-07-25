@@ -21,19 +21,14 @@ public:
 	APEInteractableBase();
 	
 	virtual ~APEInteractableBase() override;
-
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 	virtual void Tick(float DeltaSeconds) override;
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
-	UStaticMeshComponent* StaticMesh;
+	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
-	USphereComponent* SphereCollider;
-
-	UPROPERTY(Replicated)
-	FTransform Transform;
+	USphereComponent* SphereColliderComponent;
 	
 	UPROPERTY()
 	APEPlayerCharacter* Carrier;
@@ -50,6 +45,8 @@ public:
 	virtual void ApplyCarryEffect();
 
 	virtual void RemoveCarryEffect();
+
+	virtual void Interact() override;
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastSetSimulatePhysics(bool bInBool);

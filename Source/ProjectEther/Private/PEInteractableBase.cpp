@@ -3,45 +3,30 @@
 #include "PEInteractableBase.h"
 #include "Net/UnrealNetwork.h"
 
-APEInteractableBase::APEInteractableBase():
-Transform(GetTransform())
+APEInteractableBase::APEInteractableBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollider"));
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	SphereColliderComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollider"));
 	
-	RootComponent = StaticMesh;
-	SphereCollider->SetupAttachment(StaticMesh);
+	RootComponent = StaticMeshComponent;
+	SphereColliderComponent->SetupAttachment(StaticMeshComponent);
 
-	StaticMesh->SetSimulatePhysics(true);
+	StaticMeshComponent->SetSimulatePhysics(true);
+	StaticMeshComponent->SetIsReplicated(true);
+	SphereColliderComponent->SetIsReplicated(true);
 }
 
 APEInteractableBase::~APEInteractableBase()
 {
 }
 
-void APEInteractableBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(APEInteractableBase, Transform);
-}
-
 // Called every frame
 void APEInteractableBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (GetNetMode() < NM_Client)
-	{
-		Transform = GetTransform();
-	}
-	else
-	{
-		SetActorTransform(Transform);
-	}
 }
 
 void APEInteractableBase::ApplyCarryEffect()
@@ -75,7 +60,14 @@ void APEInteractableBase::RemoveCarryEffect()
 	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveCarryGameplayEffect);
 }
 
+void APEInteractableBase::Interact()
+{
+	IInteractableInterface::Interact();
+
+	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
 void APEInteractableBase::MulticastSetSimulatePhysics_Implementation(bool bInBool)
 {
-	StaticMesh->SetSimulatePhysics(bInBool);
+	StaticMeshComponent->SetSimulatePhysics(bInBool);
 }

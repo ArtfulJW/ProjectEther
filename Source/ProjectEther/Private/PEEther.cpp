@@ -23,13 +23,6 @@ void APEEther::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APEEther::Interact()
-{
-	IInteractableInterface::Interact();
-
-	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
-}
-
 void APEEther::MulticastEtherPulse_Implementation()
 {
 	if (GetNetMode() < NM_Client)
