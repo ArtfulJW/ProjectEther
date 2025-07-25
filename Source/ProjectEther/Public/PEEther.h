@@ -48,4 +48,6 @@ public:
 	void ApplyCarryEffect();
 	
 	void RemoveCarryEffect() const;
+
+	virtual void Interact() override;
 };

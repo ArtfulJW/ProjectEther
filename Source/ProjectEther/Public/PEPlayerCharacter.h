@@ -125,7 +125,7 @@ public:
 
 	void BeforeDestroy();
 
-	void IsLookingAtEther();
+	void IsLookingAtInteractable();
 	
 protected:
 	// Called when the game starts or when spawned

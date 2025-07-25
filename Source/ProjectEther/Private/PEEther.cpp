@@ -59,3 +59,10 @@ void APEEther::RemoveCarryEffect() const
 	
 	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
 }
+
+void APEEther::Interact()
+{
+	IInteractableInterface::Interact();
+
+	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+}

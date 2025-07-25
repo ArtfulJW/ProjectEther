@@ -128,7 +128,7 @@ void APEPlayerCharacter::BeforeDestroy()
 	PlayerController->Possess(SpectatorPawn);
 }
 
-void APEPlayerCharacter::IsLookingAtEther()
+void APEPlayerCharacter::IsLookingAtInteractable()
 {
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
@@ -204,5 +204,5 @@ void APEPlayerCharacter::BeginPlay()
 void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	IsLookingAtEther();
+	IsLookingAtInteractable();
 }

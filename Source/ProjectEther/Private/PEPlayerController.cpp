@@ -167,7 +167,8 @@ void APEPlayerController::ServerInteractEvent_Implementation(APEPlayerController
 	Ether->Carrier = PC;
 	Ether->ApplyCarryEffect();
 	PC->CarriedInteractableActor = InActor;
-	InActor->AttachToComponent(PC->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+	// InActor->AttachToComponent(PC->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+	Ether->Interact();
 	UE_LOG(LogTemp, Warning, TEXT("Server Interacting with Ether"));
 }
 
