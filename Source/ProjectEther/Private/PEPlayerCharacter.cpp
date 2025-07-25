@@ -44,11 +44,11 @@ void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APEPlayerCharacter, AbilityOneHandle);
-	DOREPLIFETIME(APEPlayerCharacter, AbilityTwoHandle);
-	DOREPLIFETIME(APEPlayerCharacter, AbilityThreeHandle);
-	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityOneHandle);
-	DOREPLIFETIME(APEPlayerCharacter, WeaponAbilityTwoHandle);
+	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityOneHandle, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityTwoHandle, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityThreeHandle, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityOneHandle, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityTwoHandle, COND_OwnerOnly);
 }
 
 void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
@@ -166,8 +166,8 @@ void APEPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Invalid AbilitySystemComponent"))
 	}
 	
-	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Finding"))->BaseValue;
-	float InHealth = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Health"), TEXT("Finding"))->BaseValue;
+	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Could not find PEBaseAttributeSet.Speed"))->BaseValue;
+	float InHealth = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Health"), TEXT("Could not find PEBaseAttributeSet.Health"))->BaseValue;
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed);
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetHealth(InHealth);
 	
