@@ -29,3 +29,33 @@ void APEEther::Tick(float DeltaTime)
 
 }
 
+void APEEther::ApplyCarryEffect()
+{
+	if (!IsValid(Carrier))
+	{
+		return;
+	}
+	
+	FGameplayEffectContextHandle EffectContext = Carrier->AbilitySystemComponent->MakeEffectContext();
+	EtherCarryEffectHandle = Carrier->AbilitySystemComponent->MakeOutgoingSpec(EtherCarryEffect, 1.0f, EffectContext);
+
+	if (EtherCarryEffectHandle.IsValid())
+	{
+		EtherCarryEffectSpec = EtherCarryEffectHandle.Data.Get();
+	}
+
+	if (EtherCarryEffectSpec)
+	{
+		ActiveGameplayEffect = Carrier->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EtherCarryEffectSpec);
+	}
+}
+
+void APEEther::RemoveCarryEffect() const
+{
+	if (!IsValid(Carrier))
+	{
+		return;
+	}
+	
+	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
+}

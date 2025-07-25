@@ -16,8 +16,7 @@
 #include "Net/UnrealNetwork.h"
 
 APEPlayerCharacter::APEPlayerCharacter():
-	bIsCarryingEther(false),
-	bIsLookingAtEther(false)
+	bIsLookingAtInteractableActor(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,9 +24,11 @@ APEPlayerCharacter::APEPlayerCharacter():
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AttributeSet = CreateDefaultSubobject<UPEBaseCharacterAttributeSet>(TEXT("AttributeSet"));
+	CarrySceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CarrySceneComponent"));
 	
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	CameraComponent->SetupAttachment(RootComponent);
+	CarrySceneComponent->SetupAttachment(RootComponent);
 }
 
 UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
@@ -145,8 +146,8 @@ void APEPlayerCharacter::IsLookingAtEther()
 	
 	UTextBlock* TextBlock =  Cast<UTextBlock>(PlayerHUD->GetWidgetFromName(FName("InteractTextBlock")));
 	// bIsLookingAtEther = Actor->IsA(APEEther::StaticClass());
-	bIsLookingAtEther = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
-	if (bIsLookingAtEther)
+	bIsLookingAtInteractableActor = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
+	if (bIsLookingAtInteractableActor)
 	{
 		TextBlock->SetText(FText::FromString("Press 'E' to interact"));
 	}

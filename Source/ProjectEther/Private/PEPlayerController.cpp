@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputState.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PEEther.h"
 #include "PEPlayerCharacter.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
@@ -149,6 +150,27 @@ bool APEPlayerController::IsPossessingSpectatorPawn(APEPlayerController* Request
 	return  Requester->GetPawn()->IsA(ASpectatorPawn::StaticClass());
 }
 
+void APEPlayerController::ServerInteractEvent_Implementation(APEPlayerController* Requester, AActor* InActor)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+	
+	APEEther* Ether = Cast<APEEther>(InActor);
+	if (!Ether->IsA(APEEther::StaticClass()))
+	{
+		return;
+	}
+	
+	Ether->Carrier = PC;
+	Ether->ApplyCarryEffect();
+	PC->CarriedInteractableActor = InActor;
+	InActor->AttachToComponent(PC->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+	UE_LOG(LogTemp, Warning, TEXT("Server Interacting with Ether"));
+}
+
 void APEPlayerController::InteractEvent()
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
@@ -157,8 +179,12 @@ void APEPlayerController::InteractEvent()
 		return;
 	}
 	
-	if (PC->bIsLookingAtEther)
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	AActor* Actor = Hit.GetActor();
+	
+	if (UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Looking at Ether"));
+		ServerInteractEvent(this, Actor);
 	}
 }

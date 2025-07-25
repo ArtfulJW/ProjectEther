@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Root")
 	USceneComponent* RootSceneComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Carry")
+	USceneComponent* CarrySceneComponent;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	UAttributeSet* AttributeSet;
 
@@ -107,11 +110,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
 	TSubclassOf<UPEPlayerHUD> HUDClass;
 
+	UPROPERTY()
 	UPEPlayerHUD* PlayerHUD;
 
-	bool bIsCarryingEther;
-
-	bool bIsLookingAtEther;
+	UPROPERTY()
+	AActor* CarriedInteractableActor;
+	
+	bool bIsLookingAtInteractableActor;
 	
 	UFUNCTION(Client, Unreliable)
 	void ClientRemovePlayerHUD();

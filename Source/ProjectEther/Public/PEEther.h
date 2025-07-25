@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffect.h"
 #include "InteractableInterface.h"
+#include "PEPlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "PEEther.generated.h"
@@ -22,6 +24,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
 	USphereComponent* SphereCollider;
+
+	UPROPERTY()
+	APEPlayerCharacter* Carrier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gameplay Effect")
+	TSubclassOf<UGameplayEffect> EtherCarryEffect;
+	
+	FGameplayEffectSpec* EtherCarryEffectSpec;
+
+	FGameplayEffectSpecHandle EtherCarryEffectHandle;
+	
+	FActiveGameplayEffectHandle ActiveGameplayEffect;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -31,4 +45,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void ApplyCarryEffect();
+	
+	void RemoveCarryEffect() const;
 };

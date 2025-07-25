@@ -66,6 +66,9 @@ public:
 	void UseWeaponEvent(const FInputActionValue& Value);
 
 	bool IsPossessingSpectatorPawn(APEPlayerController* Requester);
-
+	
 	void InteractEvent();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteractEvent(APEPlayerController* Requester, AActor* InActor);
 };
