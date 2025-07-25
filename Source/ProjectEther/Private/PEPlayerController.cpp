@@ -213,6 +213,7 @@ void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerCo
 		APEEther* Ether = Cast<APEEther>(PC->CarriedInteractableActor);
 		Ether->MulticastSetSimulatePhysics(true);
 		Ether->RemoveCarryEffect();
+		Ether->Carrier = nullptr;
 	}
 	
 	PC->CarriedInteractableActor = nullptr;

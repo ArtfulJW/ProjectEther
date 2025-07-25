@@ -7,7 +7,8 @@
 
 // Sets default values
 APEEther::APEEther():
-Transform(GetTransform())
+Transform(GetTransform()),
+fPulseRate(5.0f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -33,6 +34,8 @@ void APEEther::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLi
 void APEEther::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	GetWorld()->GetTimerManager().SetTimer(EtherPulseTimerHandle, this, &APEEther::MulticastEtherPulse_Implementation, fPulseRate, true);
 }
 
 // Called every frame
@@ -42,13 +45,12 @@ void APEEther::Tick(float DeltaTime)
 
 	if (GetNetMode() < NM_Client)
 	{
-		MulticastTransform();
+		Transform = GetTransform();
 	}
 	else
 	{
 		SetActorTransform(Transform);
 	}
-	
 }
 
 void APEEther::ApplyCarryEffect()
@@ -89,9 +91,16 @@ void APEEther::Interact()
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
 }
 
-void APEEther::MulticastTransform_Implementation()
+void APEEther::MulticastEtherPulse_Implementation()
 {
-	Transform = GetTransform();
+	if (GetNetMode() < NM_Client)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast; Server Ether Pulse"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast; Client Ether Pulse"));
+	}
 }
 
 void APEEther::MulticastSetSimulatePhysics_Implementation(bool bInBool)

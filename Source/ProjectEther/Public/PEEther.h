@@ -41,6 +41,11 @@ public:
 	FGameplayEffectSpecHandle EtherCarryEffectHandle;
 	
 	FActiveGameplayEffectHandle ActiveCarryGameplayEffect;
+
+	FTimerHandle EtherPulseTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Specs")
+	float fPulseRate;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -60,5 +65,5 @@ public:
 	void MulticastSetSimulatePhysics(bool bInBool);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastTransform();
+	void MulticastEtherPulse();
 };
