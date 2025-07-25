@@ -3,8 +3,11 @@
 
 #include "PEEther.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values
-APEEther::APEEther()
+APEEther::APEEther():
+Transform(GetTransform())
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,6 +22,13 @@ APEEther::APEEther()
 	StaticMesh->SetSimulatePhysics(true);
 }
 
+void APEEther::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEEther, Transform);
+}
+
 // Called when the game starts or when spawned
 void APEEther::BeginPlay()
 {
@@ -30,6 +40,15 @@ void APEEther::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetNetMode() < NM_Client)
+	{
+		MulticastTransform();
+	}
+	else
+	{
+		SetActorTransform(Transform);
+	}
+	
 }
 
 void APEEther::ApplyCarryEffect()
@@ -68,6 +87,11 @@ void APEEther::Interact()
 	IInteractableInterface::Interact();
 
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+}
+
+void APEEther::MulticastTransform_Implementation()
+{
+	Transform = GetTransform();
 }
 
 void APEEther::MulticastSetSimulatePhysics_Implementation(bool bInBool)

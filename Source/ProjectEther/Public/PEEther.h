@@ -19,12 +19,17 @@ public:
 	// Sets default values for this actor's properties
 	APEEther();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
 	UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
 	USphereComponent* SphereCollider;
 
+	UPROPERTY(Replicated)
+	FTransform Transform;
+	
 	UPROPERTY()
 	APEPlayerCharacter* Carrier;
 
@@ -53,4 +58,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSetSimulatePhysics(bool bInBool);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastTransform();
 };
