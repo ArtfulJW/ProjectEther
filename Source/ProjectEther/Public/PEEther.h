@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
+#include "PEInteractableBase.h"
 #include "InteractableInterface.h"
 #include "PEPlayerCharacter.h"
 #include "Components/SphereComponent.h"
@@ -11,7 +12,7 @@
 #include "PEEther.generated.h"
 
 UCLASS()
-class PROJECTETHER_API APEEther : public AActor, public IInteractableInterface
+class PROJECTETHER_API APEEther : public APEInteractableBase
 {
 	GENERATED_BODY()
 	
@@ -19,28 +20,28 @@ public:
 	// Sets default values for this actor's properties
 	APEEther();
 
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	// virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
-	UStaticMeshComponent* StaticMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
-	USphereComponent* SphereCollider;
-
-	UPROPERTY(Replicated)
-	FTransform Transform;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
+	// UStaticMeshComponent* StaticMesh;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
+	// USphereComponent* SphereCollider;
+	//
+	// UPROPERTY(Replicated)
+	// FTransform Transform;
 	
-	UPROPERTY()
-	APEPlayerCharacter* Carrier;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gameplay Effect")
-	TSubclassOf<UGameplayEffect> EtherCarryEffect;
-	
-	FGameplayEffectSpec* EtherCarryEffectSpec;
-
-	FGameplayEffectSpecHandle EtherCarryEffectHandle;
-	
-	FActiveGameplayEffectHandle ActiveCarryGameplayEffect;
+	// UPROPERTY()
+	// APEPlayerCharacter* Carrier;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gameplay Effect")
+	// TSubclassOf<UGameplayEffect> EtherCarryEffect;
+	//
+	// FGameplayEffectSpec* EtherCarryEffectSpec;
+	//
+	// FGameplayEffectSpecHandle EtherCarryEffectHandle;
+	//
+	// FActiveGameplayEffectHandle ActiveCarryGameplayEffect;
 
 	FTimerHandle EtherPulseTimerHandle;
 
@@ -55,14 +56,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void ApplyCarryEffect();
-	
-	void RemoveCarryEffect() const;
+	// void ApplyCarryEffect();
+	//
+	// void RemoveCarryEffect() const;
 
 	virtual void Interact() override;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastSetSimulatePhysics(bool bInBool);
+	// UFUNCTION(NetMulticast, Reliable)
+	// void MulticastSetSimulatePhysics(bool bInBool);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEtherPulse();

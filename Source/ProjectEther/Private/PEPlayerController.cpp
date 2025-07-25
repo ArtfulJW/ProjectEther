@@ -158,19 +158,18 @@ void APEPlayerController::ServerInteractEvent_Implementation(APEPlayerController
 		return;
 	}
 	
-	APEEther* Ether = Cast<APEEther>(InActor);
-	if (!Ether->IsA(APEEther::StaticClass()))
+	APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(InActor);
+	if (!InteractableActor->IsA(APEInteractableBase::StaticClass()))
 	{
 		return;
 	}
 	
-	Ether->Carrier = PC;
-	Ether->ApplyCarryEffect();
+	InteractableActor->Carrier = PC;
+	InteractableActor->ApplyCarryEffect();
 	PC->CarriedInteractableActor = InActor;
-	// Ether->StaticMesh->SetSimulatePhysics(false);
-	Ether->MulticastSetSimulatePhysics(false);
+	InteractableActor->MulticastSetSimulatePhysics(false);
+	InteractableActor->Interact();
 	
-	Ether->Interact();
 	UE_LOG(LogTemp, Warning, TEXT("Server Interacting with Ether"));
 }
 
@@ -203,17 +202,16 @@ void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerCo
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
 	if (PC->CarriedInteractableActor)
 	{
-		
 		PC->CarriedInteractableActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		UE_LOG(LogTemp, Warning, TEXT("Server drop Interactable Actor"));
 	}
 
-	if (PC->CarriedInteractableActor->IsA(APEEther::StaticClass()))
+	if (PC->CarriedInteractableActor->IsA(APEInteractableBase::StaticClass()))
 	{
-		APEEther* Ether = Cast<APEEther>(PC->CarriedInteractableActor);
-		Ether->MulticastSetSimulatePhysics(true);
-		Ether->RemoveCarryEffect();
-		Ether->Carrier = nullptr;
+		APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(PC->CarriedInteractableActor);
+		InteractableActor->MulticastSetSimulatePhysics(true);
+		InteractableActor->RemoveCarryEffect();
+		InteractableActor->Carrier = nullptr;
 	}
 	
 	PC->CarriedInteractableActor = nullptr;
