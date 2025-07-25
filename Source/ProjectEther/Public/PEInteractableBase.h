@@ -48,6 +48,8 @@ public:
 
 	virtual void Interact() override;
 
+	virtual void Deploy() override;
+
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastSetSimulatePhysics(bool bInBool);
 };

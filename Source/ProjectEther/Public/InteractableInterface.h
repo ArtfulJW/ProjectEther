@@ -22,4 +22,6 @@ class PROJECTETHER_API IInteractableInterface
 
 public:
 	virtual void Interact();
+	
+	virtual void Deploy();
 };

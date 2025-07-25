@@ -7,3 +7,7 @@
 void IInteractableInterface::Interact()
 {
 }
+
+void IInteractableInterface::Deploy()
+{
+}

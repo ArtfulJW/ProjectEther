@@ -67,6 +67,11 @@ void APEInteractableBase::Interact()
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+void APEInteractableBase::Deploy()
+{
+	IInteractableInterface::Deploy();
+}
+
 void APEInteractableBase::MulticastSetSimulatePhysics_Implementation(bool bInBool)
 {
 	StaticMeshComponent->SetSimulatePhysics(bInBool);

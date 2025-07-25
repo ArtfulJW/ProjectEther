@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "InputMappingContext.h"
+#include "PEInteractableBase.h"
 #include "PEPlayerController.generated.h"
 
 /**
@@ -44,6 +45,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* DeployInteractableAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
@@ -69,9 +73,14 @@ public:
 	
 	void InteractEvent();
 
+	void DeployInteractableEvent();
+
 	UFUNCTION(Server, Reliable)
 	void ServerInteractEvent(APEPlayerController* Requester, AActor* InActor);
 
 	UFUNCTION(Server, Reliable)
 	void ServerDropInteractableActor(APEPlayerController* Requester);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDeployInteractable(APEInteractableBase* InActor);
 };

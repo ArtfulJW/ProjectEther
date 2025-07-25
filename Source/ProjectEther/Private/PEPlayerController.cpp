@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputState.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PEEquipmentCache.h"
 #include "PEEther.h"
 #include "PEPlayerCharacter.h"
 #include "GameFramework/SpectatorPawn.h"
@@ -44,6 +45,7 @@ void APEPlayerController::SetupInputComponent()
 	Input->BindAction(AbilityAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseAbilityEvent);
 	Input->BindAction(WeaponAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseWeaponEvent);
 	Input->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APEPlayerController::InteractEvent);
+	Input->BindAction(DeployInteractableAction, ETriggerEvent::Triggered, this, &APEPlayerController::DeployInteractableEvent);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -190,11 +192,44 @@ void APEPlayerController::InteractEvent()
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
+
+	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
+	if (EquipmentCache && EquipmentCache->bIsDeployed)
+	{
+		return;
+	}
 	
 	if (UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass()))
 	{
 		ServerInteractEvent(this, Actor);
 	}
+}
+
+void APEPlayerController::DeployInteractableEvent()
+{
+	FHitResult Hit;
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+
+	AActor* HitActor = Hit.GetActor();
+	if (!IsValid(HitActor))
+	{
+		return;
+	}
+
+	APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(HitActor);
+	if (!HitActor->IsA(APEEquipmentCache::StaticClass()) || HitActor == PC->CarriedInteractableActor)
+	{
+		return;		
+	}
+	
+	ServerDeployInteractable(InteractableActor);
+}
+
+void APEPlayerController::ServerDeployInteractable_Implementation(APEInteractableBase* InActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Server Deploy: %s"), *InActor->GetName())
+	InActor->Deploy();
 }
 
 void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerController* Requester)

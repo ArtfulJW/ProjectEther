@@ -5,6 +5,7 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEPlayerController.h"
 #include "PEBaseGameplayAbility.h"
+#include "PEEquipmentCache.h"
 #include "PEEther.h"
 #include "SNegativeActionButton.h"
 #include "Components/TextBlock.h"
@@ -146,16 +147,28 @@ void APEPlayerCharacter::IsLookingAtInteractable()
 	}
 	
 	UTextBlock* TextBlock =  Cast<UTextBlock>(PlayerHUD->GetWidgetFromName(FName("InteractTextBlock")));
-	// bIsLookingAtEther = Actor->IsA(APEEther::StaticClass());
 	bIsLookingAtInteractableActor = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
+
+	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
+	if (EquipmentCache && EquipmentCache->bIsDeployed)
+	{
+		TextBlock->SetText(FText::FromString("Cannot pick up deployed Equipment Cache"));
+		return;
+	}
+	
+	if (Actor == CarriedInteractableActor)
+	{
+		TextBlock->SetText(FText::FromString("Press 'E' to drop"));
+		return;
+	}
+	
 	if (bIsLookingAtInteractableActor)
 	{
 		TextBlock->SetText(FText::FromString("Press 'E' to interact"));
+		return;
 	}
-	else
-	{
-		TextBlock->SetText(FText::FromString(""));
-	}
+	
+	TextBlock->SetText(FText::FromString(""));
 }
 
 // Called when the game starts or when spawned
