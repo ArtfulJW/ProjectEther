@@ -167,7 +167,9 @@ void APEPlayerController::ServerInteractEvent_Implementation(APEPlayerController
 	Ether->Carrier = PC;
 	Ether->ApplyCarryEffect();
 	PC->CarriedInteractableActor = InActor;
-	// InActor->AttachToComponent(PC->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+	// Ether->StaticMesh->SetSimulatePhysics(false);
+	Ether->MulticastSetSimulatePhysics(false);
+	
 	Ether->Interact();
 	UE_LOG(LogTemp, Warning, TEXT("Server Interacting with Ether"));
 }
@@ -179,6 +181,12 @@ void APEPlayerController::InteractEvent()
 	{
 		return;
 	}
+
+	if (PC->CarriedInteractableActor)
+	{
+		ServerDropInteractableActor(this);
+		return;
+	}
 	
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
@@ -188,4 +196,24 @@ void APEPlayerController::InteractEvent()
 	{
 		ServerInteractEvent(this, Actor);
 	}
+}
+
+void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerController* Requester)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (PC->CarriedInteractableActor)
+	{
+		
+		PC->CarriedInteractableActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		UE_LOG(LogTemp, Warning, TEXT("Server drop Interactable Actor"));
+	}
+
+	if (PC->CarriedInteractableActor->IsA(APEEther::StaticClass()))
+	{
+		APEEther* Ether = Cast<APEEther>(PC->CarriedInteractableActor);
+		Ether->MulticastSetSimulatePhysics(true);
+		Ether->RemoveCarryEffect();
+	}
+	
+	PC->CarriedInteractableActor = nullptr;
 }

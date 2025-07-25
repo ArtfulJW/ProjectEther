@@ -113,7 +113,7 @@ public:
 	UPROPERTY()
 	UPEPlayerHUD* PlayerHUD;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AActor* CarriedInteractableActor;
 	
 	bool bIsLookingAtInteractableActor;

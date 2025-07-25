@@ -8,12 +8,15 @@ APEEther::APEEther()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	bReplicates = true;
+	
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	SphereCollider = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollider"));
 	
-	StaticMesh->SetupAttachment(RootComponent);
-	SphereCollider->SetupAttachment(RootComponent);
+	RootComponent = StaticMesh;
+	SphereCollider->SetupAttachment(StaticMesh);
+
+	StaticMesh->SetSimulatePhysics(true);
 }
 
 // Called when the game starts or when spawned
@@ -46,7 +49,7 @@ void APEEther::ApplyCarryEffect()
 
 	if (EtherCarryEffectSpec)
 	{
-		ActiveGameplayEffect = Carrier->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EtherCarryEffectSpec);
+		ActiveCarryGameplayEffect = Carrier->AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EtherCarryEffectSpec);
 	}
 }
 
@@ -57,7 +60,7 @@ void APEEther::RemoveCarryEffect() const
 		return;
 	}
 	
-	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
+	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveCarryGameplayEffect);
 }
 
 void APEEther::Interact()
@@ -65,4 +68,9 @@ void APEEther::Interact()
 	IInteractableInterface::Interact();
 
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetIncludingScale);
+}
+
+void APEEther::MulticastSetSimulatePhysics_Implementation(bool bInBool)
+{
+	StaticMesh->SetSimulatePhysics(bInBool);
 }

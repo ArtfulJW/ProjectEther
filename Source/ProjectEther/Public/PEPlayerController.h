@@ -71,4 +71,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerInteractEvent(APEPlayerController* Requester, AActor* InActor);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDropInteractableActor(APEPlayerController* Requester);
 };

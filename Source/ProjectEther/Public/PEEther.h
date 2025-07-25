@@ -35,7 +35,7 @@ public:
 
 	FGameplayEffectSpecHandle EtherCarryEffectHandle;
 	
-	FActiveGameplayEffectHandle ActiveGameplayEffect;
+	FActiveGameplayEffectHandle ActiveCarryGameplayEffect;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -50,4 +50,7 @@ public:
 	void RemoveCarryEffect() const;
 
 	virtual void Interact() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetSimulatePhysics(bool bInBool);
 };

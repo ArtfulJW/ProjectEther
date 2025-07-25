@@ -50,6 +50,7 @@ void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityThreeHandle, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityOneHandle, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityTwoHandle, COND_OwnerOnly);
+	DOREPLIFETIME(APEPlayerCharacter, CarriedInteractableActor);
 }
 
 void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
