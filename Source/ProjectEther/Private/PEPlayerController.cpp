@@ -200,6 +200,11 @@ void APEPlayerController::InteractEvent()
 	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
 
+	if (!IsValid(Actor))
+	{
+		return;
+	}
+	
 	if (Actor->IsA(APEEquipmentCache::StaticClass()))
 	{
 		APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
@@ -226,20 +231,25 @@ void APEPlayerController::DeployInteractableEvent()
 	{
 		return;
 	}
-
-	APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(HitActor);
+	
 	if (!HitActor->IsA(APEEquipmentCache::StaticClass()) || HitActor == PC->CarriedInteractableActor)
 	{
 		return;		
 	}
 
 	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(HitActor);
-	if (!IsValid(EquipmentCache) || EquipmentCache->Team != Team)
+	if (IsValid(EquipmentCache))
 	{
-		return;
+		if (EquipmentCache->Team != Team)
+		{
+			// EquipmentCache->ServerDestroyEquipmentCache();
+			ServerDestroyEquipmentCache(EquipmentCache);
+		}
+		else
+		{
+			ServerDeployInteractable(EquipmentCache);	
+		}
 	}
-	
-	ServerDeployInteractable(InteractableActor);
 }
 
 void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> PossessedCharacter)
@@ -249,6 +259,11 @@ void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> P
 	{
 		GameState->PlayerControllerCharacterArray.Add(this, PossessedCharacter);
 	}
+}
+
+void APEPlayerController::ServerDestroyEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache)
+{
+	EquipmentCache->Destroy();
 }
 
 void APEPlayerController::ServerDeployInteractable_Implementation(APEInteractableBase* InActor)

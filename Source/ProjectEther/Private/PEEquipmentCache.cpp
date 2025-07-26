@@ -9,6 +9,7 @@ APEEquipmentCache::APEEquipmentCache():
 	bIsDeployed(false),
 	NumRevives(3)
 {
+	bReplicates = true;
 }
 
 void APEEquipmentCache::BeginPlay()
@@ -16,7 +17,6 @@ void APEEquipmentCache::BeginPlay()
 	Super::BeginPlay();
 
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	// GameState->AssignTeamToEquipmentCache(this);
 	GameState->ServerAddEquipmentCache(this, Team);
 }
 
@@ -54,7 +54,6 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 	
 	if (NumRevives > 0)
 	{
-		NumRevives--;
 		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
 		// GetWorld()->SpawnActor<APEPlayerCharacter>(GameState->PlayerControllerCharacterArray[Requester]);
 		FVector Vector = GetTransform().GetLocation();
@@ -68,4 +67,16 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 		UE_LOG(LogTemp, Warning, TEXT("Equipment Cache: %s has no more Revive Tokens"), *this->GetName());
 		Destroy();
 	}
+
+	NumRevives--;
+	if (NumRevives <= 0)
+	{
+		Destroy();
+	}
+}
+
+void APEEquipmentCache::ServerDestroyEquipmentCache_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("GOD I HATE THIS SHGIT"))
+	Destroy();
 }

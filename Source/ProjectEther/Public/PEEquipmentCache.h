@@ -39,4 +39,7 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	TEnumAsByte<ETeam> Team;
+
+	UFUNCTION(Server, Reliable)
+	void ServerDestroyEquipmentCache();
 };

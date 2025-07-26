@@ -11,6 +11,7 @@
 #include "PEEtherWarStructs.h"
 #include "PEPlayerController.generated.h"
 
+class APEEquipmentCache;
 /**
  * 
  */
@@ -91,4 +92,7 @@ public:
 	void ServerDeployInteractable(APEInteractableBase* InActor);
 	
 	void SubscribeToGameState(TSubclassOf<APEPlayerCharacter> PossessedCharacter);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDestroyEquipmentCache(APEEquipmentCache* EquipmentCache);
 };
