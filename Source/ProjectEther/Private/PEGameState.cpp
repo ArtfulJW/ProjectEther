@@ -2,6 +2,7 @@
 
 #include "PEGameState.h"
 
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 void APEGameState::AssignTeamToPlayerController_Implementation(APEPlayerController* Requester)
@@ -27,10 +28,40 @@ void APEGameState::ServerAddEquipmentCache_Implementation(APEEquipmentCache* Equ
 	}
 }
 
+void APEGameState::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APEGameState, TeamOneEquipmentCache);
 	DOREPLIFETIME(APEGameState, TeamTwoEquipmentCache);
+}
+
+void APEGameState::ServerAssignPlayerToTeam_Implementation(APEPlayerController* Requester)
+{
+	int x = 0;
+	for (APlayerState* PlayerState : this->PlayerArray)
+	{
+		APEPlayerController* CachedPC = Cast<APEPlayerController>(PlayerState->GetPlayerController());
+		if (CachedPC != Requester)
+		{
+			x++;
+			continue;
+		}
+		
+		if (x % 2 == 0)
+		{
+			CachedPC->Team = TeamOne;
+		}
+		else
+		{
+			CachedPC->Team = TeamTwo;
+		}
+		
+		x++;
+	}
 }

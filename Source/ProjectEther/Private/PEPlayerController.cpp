@@ -19,12 +19,8 @@ void APEPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (GetNetMode() < NM_Client)
-	{
-		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-		GameState->AssignTeamToPlayerController(this);
-		return;
-	}
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	GameState->ServerAssignPlayerToTeam(this);
 	
 	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	if (!IsValid(LocalPlayer))
@@ -204,10 +200,13 @@ void APEPlayerController::InteractEvent()
 	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
 
-	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
-	if (EquipmentCache && EquipmentCache->bIsDeployed)
+	if (Actor->IsA(APEEquipmentCache::StaticClass()))
 	{
-		return;
+		APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
+		if (EquipmentCache && EquipmentCache->bIsDeployed || EquipmentCache->Team != Team)
+		{
+			return;
+		}
 	}
 	
 	if (UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass()))
@@ -232,6 +231,12 @@ void APEPlayerController::DeployInteractableEvent()
 	if (!HitActor->IsA(APEEquipmentCache::StaticClass()) || HitActor == PC->CarriedInteractableActor)
 	{
 		return;		
+	}
+
+	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(HitActor);
+	if (!IsValid(EquipmentCache) || EquipmentCache->Team != Team)
+	{
+		return;
 	}
 	
 	ServerDeployInteractable(InteractableActor);

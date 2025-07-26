@@ -18,6 +18,8 @@ class PROJECTETHER_API APEGameState : public AGameStateBase
 
 public:
 
+	virtual void BeginPlay() override;
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	/*
@@ -40,4 +42,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAddEquipmentCache(APEEquipmentCache* EquipmentCache, ETeam EquipmentCacheTeam);
+
+	UFUNCTION(Server, Reliable)
+	void ServerAssignPlayerToTeam(APEPlayerController* Requester);
 };

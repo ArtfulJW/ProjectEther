@@ -158,10 +158,19 @@ void APEPlayerCharacter::IsLookingAtInteractable()
 	bIsLookingAtInteractableActor = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
 
 	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
-	if (EquipmentCache && EquipmentCache->bIsDeployed)
+	APEPlayerController* PC = Cast<APEPlayerController>(GetController());
+	if (EquipmentCache)
 	{
-		TextBlock->SetText(FText::FromString("Cannot pick up deployed Equipment Cache"));
-		return;
+		if (EquipmentCache->Team != PC->Team)
+		{
+			TextBlock->SetText(FText::FromString(""));
+			return;
+		}
+		if (EquipmentCache->bIsDeployed)
+		{
+			TextBlock->SetText(FText::FromString("Cannot pick up deployed Equipment Cache"));
+			return;
+		}
 	}
 	
 	if (Actor == CarriedInteractableActor)
