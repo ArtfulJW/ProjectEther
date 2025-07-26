@@ -27,10 +27,13 @@ APEPlayerCharacter::APEPlayerCharacter():
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AttributeSet = CreateDefaultSubobject<UPEBaseCharacterAttributeSet>(TEXT("AttributeSet"));
 	CarrySceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CarrySceneComponent"));
+	EtherCompassSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("EtherCompassSceneComponent"));
+
 	
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	CameraComponent->SetupAttachment(RootComponent);
 	CarrySceneComponent->SetupAttachment(RootComponent);
+	EtherCompassSceneComponent->SetupAttachment(RootComponent);
 }
 
 UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
@@ -209,6 +212,12 @@ void APEPlayerCharacter::BeginPlay()
 	if (!IsValid(HUDClass))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid HUDClass"))
+	}
+
+	if (IsValid(EtherCompassClass))
+	{
+		EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
+		EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 	
 	if (IsLocallyControlled())

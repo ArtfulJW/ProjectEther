@@ -9,6 +9,7 @@
 #include "AbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "PEBaseCharacterAttributeSet.h"
+#include "PEEtherCompass.h"
 #include "PEPlayerHUD.h"
 #include "PEPlayerCharacter.generated.h"
 
@@ -110,6 +111,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
 	TSubclassOf<UPEPlayerHUD> HUDClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Compass")
+	TSubclassOf<APEEtherCompass> EtherCompassClass;
+
+	UPROPERTY()
+	APEEtherCompass* EtherCompassActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Compass")
+	USceneComponent* EtherCompassSceneComponent;
+	
 	UPROPERTY()
 	UPEPlayerHUD* PlayerHUD;
 

@@ -39,6 +39,12 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(APEGameState, TeamOneEquipmentCache);
 	DOREPLIFETIME(APEGameState, TeamTwoEquipmentCache);
+	DOREPLIFETIME(APEGameState, Ether);
+}
+
+void APEGameState::ServerAssignEther_Implementation(APEEther* InEther)
+{
+	Ether = InEther;
 }
 
 void APEGameState::ServerAssignPlayerToTeam_Implementation(APEPlayerController* Requester)

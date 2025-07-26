@@ -2,6 +2,9 @@
 
 #include "PEEther.h"
 
+#include "PEGameState.h"
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 APEEther::APEEther():
 fPulseRate(5.0f)
@@ -13,6 +16,9 @@ fPulseRate(5.0f)
 void APEEther::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	GameState->ServerAssignEther(this);
 	
 	GetWorld()->GetTimerManager().SetTimer(EtherPulseTimerHandle, this, &APEEther::MulticastEtherPulse_Implementation, fPulseRate, true);
 }

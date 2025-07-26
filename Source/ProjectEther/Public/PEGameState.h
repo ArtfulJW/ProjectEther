@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PEEquipmentCache.h"
+#include "PEEther.h"
 #include "PEPlayerController.h"
 #include "GameFramework/GameStateBase.h"
 #include "PEGameState.generated.h"
@@ -34,6 +35,9 @@ public:
 	UPROPERTY(Replicated)
 	TArray<APEEquipmentCache*> TeamTwoEquipmentCache;
 
+	UPROPERTY(Replicated)
+	APEEther* Ether;
+
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
 
@@ -45,4 +49,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAssignPlayerToTeam(APEPlayerController* Requester);
+
+	UFUNCTION(Server, Reliable)
+	void ServerAssignEther(APEEther* InEther);
 };
