@@ -242,7 +242,6 @@ void APEPlayerController::DeployInteractableEvent()
 	{
 		if (EquipmentCache->Team != Team)
 		{
-			// EquipmentCache->ServerDestroyEquipmentCache();
 			ServerDestroyEquipmentCache(EquipmentCache);
 		}
 		else

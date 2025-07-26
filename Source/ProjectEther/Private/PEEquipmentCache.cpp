@@ -74,9 +74,3 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 		Destroy();
 	}
 }
-
-void APEEquipmentCache::ServerDestroyEquipmentCache_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("GOD I HATE THIS SHGIT"))
-	Destroy();
-}
