@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PEEtherWarStructs.h"
 #include "PEInteractableBase.h"
+#include "PEPlayerController.h"
 #include "PEEquipmentCache.generated.h"
 
 /**
@@ -18,13 +20,23 @@ public:
 
 	APEEquipmentCache();
 
+	virtual void BeginPlay() override;
+	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void Deploy() override;
 
+	void SpawnPlayer(APEPlayerController* Requester);
+	
 	UPROPERTY(Replicated)
 	bool bIsDeployed;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	int NumRevives;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
+	TSubclassOf<APEPlayerCharacter> PlayerCharacter;
+
+	UPROPERTY(Replicated)
+	TEnumAsByte<ETeam> Team;
 };

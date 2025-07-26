@@ -13,5 +13,4 @@ UCLASS()
 class PROJECTETHER_API APEGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
 };

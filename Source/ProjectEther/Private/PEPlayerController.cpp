@@ -7,9 +7,11 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEEquipmentCache.h"
 #include "PEEther.h"
+#include "PEGameState.h"
 #include "PEPlayerCharacter.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 class APEPlayerCharacter;
 
@@ -19,6 +21,8 @@ void APEPlayerController::BeginPlay()
 	
 	if (GetNetMode() < NM_Client)
 	{
+		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		GameState->AssignTeamToPlayerController(this);
 		return;
 	}
 	
@@ -46,6 +50,13 @@ void APEPlayerController::SetupInputComponent()
 	Input->BindAction(WeaponAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseWeaponEvent);
 	Input->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APEPlayerController::InteractEvent);
 	Input->BindAction(DeployInteractableAction, ETriggerEvent::Triggered, this, &APEPlayerController::DeployInteractableEvent);
+}
+
+void APEPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEPlayerController, Team);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -224,6 +235,15 @@ void APEPlayerController::DeployInteractableEvent()
 	}
 	
 	ServerDeployInteractable(InteractableActor);
+}
+
+void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> PossessedCharacter)
+{
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	if (!GameState->PlayerControllerCharacterArray.Contains(this))
+	{
+		GameState->PlayerControllerCharacterArray.Add(this, PossessedCharacter);
+	}
 }
 
 void APEPlayerController::ServerDeployInteractable_Implementation(APEInteractableBase* InActor)

@@ -7,6 +7,7 @@
 #include "PEBaseGameplayAbility.h"
 #include "PEEquipmentCache.h"
 #include "PEEther.h"
+#include "PEGameState.h"
 #include "SNegativeActionButton.h"
 #include "Components/TextBlock.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
@@ -124,7 +125,14 @@ void APEPlayerCharacter::BeforeDestroy()
 	{
 		return;
 	}
-	
+
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	if (!IsValid(GameState))
+	{
+		return;
+	}
+
+	// GameState->PlayerControllerCharacterArray.Remove(PlayerController);
 	PlayerCharacter->ClientRemovePlayerHUD();
 	SpectatorPawn->SetActorLocation(GetActorLocation());
 	PlayerController->Possess(SpectatorPawn);
@@ -201,6 +209,7 @@ void APEPlayerCharacter::BeginPlay()
 		PlayerHUD = CreateWidget<UPEPlayerHUD>(PC, HUDClass);
 		ensureMsgf(PlayerHUD, TEXT("PlayerHUD failed to instantiate properly"));
 		PlayerHUD->AddToViewport();
+		PC->SubscribeToGameState(this->GetClass());
 	}
 	
 	if (GetNetMode() < NM_Client)

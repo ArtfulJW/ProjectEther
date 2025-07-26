@@ -8,6 +8,7 @@
 #include "GameplayAbilitySpecHandle.h"
 #include "InputMappingContext.h"
 #include "PEInteractableBase.h"
+#include "PEEtherWarStructs.h"
 #include "PEPlayerController.generated.h"
 
 /**
@@ -22,6 +23,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void SetupInputComponent() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	/*
 	 * 
@@ -51,6 +54,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
+
+	UPROPERTY(Replicated)
+	TEnumAsByte<ETeam> Team;
 	
 	void MoveEvent(const FInputActionValue& Value);
 
@@ -83,4 +89,6 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerDeployInteractable(APEInteractableBase* InActor);
+	
+	void SubscribeToGameState(TSubclassOf<APEPlayerCharacter> PossessedCharacter);
 };
