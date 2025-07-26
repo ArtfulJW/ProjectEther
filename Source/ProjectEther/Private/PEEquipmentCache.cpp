@@ -7,7 +7,7 @@
 
 APEEquipmentCache::APEEquipmentCache():
 	bIsDeployed(false),
-	NumRevives(3), Team(TeamOne)
+	NumRevives(3)
 {
 }
 
@@ -16,8 +16,8 @@ void APEEquipmentCache::BeginPlay()
 	Super::BeginPlay();
 
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	GameState->AssignTeamToEquipmentCache(this);
-	GameState->AddTeamOneEquipmentCache(this);
+	// GameState->AssignTeamToEquipmentCache(this);
+	GameState->ServerAddEquipmentCache(this, Team);
 }
 
 void APEEquipmentCache::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -43,7 +43,15 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 	if (!bIsDeployed)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Equipment Cache: %s is not Deployed"), *this->GetName());
+		return;
 	}
+
+	if (Requester->Team != Team)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot Spawn Player: Equipment Cache and Requested Player not on the same team"));
+		return;
+	}
+	
 	if (NumRevives > 0)
 	{
 		NumRevives--;

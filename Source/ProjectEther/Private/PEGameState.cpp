@@ -2,6 +2,8 @@
 
 #include "PEGameState.h"
 
+#include "Net/UnrealNetwork.h"
+
 void APEGameState::AssignTeamToPlayerController_Implementation(APEPlayerController* Requester)
 {
 	Requester->Team = TeamOne;
@@ -12,7 +14,23 @@ void APEGameState::AssignTeamToEquipmentCache_Implementation(APEEquipmentCache* 
 	EquipmentCache->Team = TeamOne;
 }
 
-void APEGameState::AddTeamOneEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache)
+void APEGameState::ServerAddEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache, const ETeam EquipmentCacheTeam)
 {
-	TeamOneEquipmentCache.Add(EquipmentCache);
+	switch (EquipmentCacheTeam)
+	{
+		case TeamOne:
+			TeamOneEquipmentCache.Add(EquipmentCache);
+			break;
+		case TeamTwo:
+			TeamTwoEquipmentCache.Add(EquipmentCache);
+			break;
+	}
+}
+
+void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEGameState, TeamOneEquipmentCache);
+	DOREPLIFETIME(APEGameState, TeamTwoEquipmentCache);
 }

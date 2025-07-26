@@ -37,6 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	TSubclassOf<APEPlayerCharacter> PlayerCharacter;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	TEnumAsByte<ETeam> Team;
 };

@@ -18,14 +18,19 @@ class PROJECTETHER_API APEGameState : public AGameStateBase
 
 public:
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	/*
 	 * TODO: REMOVE DEPRACATED AND ALL ASSOCIATED
 	 */
 	UPROPERTY()
 	TMap<APEPlayerController*, TSubclassOf<APEPlayerCharacter>> PlayerControllerCharacterArray; 
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<APEEquipmentCache*> TeamOneEquipmentCache;
+
+	UPROPERTY(Replicated)
+	TArray<APEEquipmentCache*> TeamTwoEquipmentCache;
 
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
@@ -34,5 +39,5 @@ public:
 	void AssignTeamToEquipmentCache(APEEquipmentCache* EquipmentCache);
 
 	UFUNCTION(Server, Reliable)
-	void AddTeamOneEquipmentCache(APEEquipmentCache* EquipmentCache);
+	void ServerAddEquipmentCache(APEEquipmentCache* EquipmentCache, ETeam EquipmentCacheTeam);
 };

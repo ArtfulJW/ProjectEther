@@ -15,7 +15,7 @@ void APESpectatorPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APESpectatorPawn::RequestRevive, fDeathTimeDelay, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &APESpectatorPawn::RequestRevive, fDeathTimeDelay, true);
 }
 
 void APESpectatorPawn::RequestRevive()
@@ -35,6 +35,23 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	}
 
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamOneEquipmentCache[0]);
+
+	APEEquipmentCache* EquipmentCache = nullptr;
+	switch (Requester->Team)
+	{
+		case TeamOne:
+			EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamOneEquipmentCache[0]);
+			break;
+		case TeamTwo:
+			EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamTwoEquipmentCache[0]);
+			break;
+	}
+
+	if (!IsValid(EquipmentCache))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There are no suitable spawners"))
+		return;
+	}
+	
 	EquipmentCache->SpawnPlayer(Requester);
 }
