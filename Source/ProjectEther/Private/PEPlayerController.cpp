@@ -46,6 +46,7 @@ void APEPlayerController::SetupInputComponent()
 	Input->BindAction(WeaponAction, ETriggerEvent::Triggered, this, &APEPlayerController::UseWeaponEvent);
 	Input->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APEPlayerController::InteractEvent);
 	Input->BindAction(DeployInteractableAction, ETriggerEvent::Triggered, this, &APEPlayerController::DeployInteractableEvent);
+	Input->BindAction(CheckCompassAction, ETriggerEvent::Triggered, this, &APEPlayerController::CheckCompassEvent);
 }
 
 void APEPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -251,6 +252,11 @@ void APEPlayerController::DeployInteractableEvent()
 	}
 }
 
+void APEPlayerController::CheckCompassEvent()
+{
+	ServerCheckCompassEvent(this);
+}
+
 void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> PossessedCharacter)
 {
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
@@ -258,6 +264,18 @@ void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> P
 	{
 		GameState->PlayerControllerCharacterArray.Add(this, PossessedCharacter);
 	}
+}
+
+void APEPlayerController::ServerCheckCompassEvent_Implementation(APEPlayerController* Requester)
+{
+	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	APEEtherCompass* EtherCompass = PC->EtherCompassActor;
+	EtherCompass->SetIsCheckingCompass(!EtherCompass->bIsTakenOut);
 }
 
 void APEPlayerController::ServerDestroyEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache)

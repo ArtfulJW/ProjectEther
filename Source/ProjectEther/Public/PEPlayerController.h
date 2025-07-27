@@ -52,6 +52,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* DeployInteractableAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* CheckCompassAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
@@ -82,6 +85,8 @@ public:
 
 	void DeployInteractableEvent();
 
+	void CheckCompassEvent();
+
 	UFUNCTION(Server, Reliable)
 	void ServerInteractEvent(APEPlayerController* Requester, AActor* InActor);
 
@@ -95,4 +100,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerDestroyEquipmentCache(APEEquipmentCache* EquipmentCache);
+
+	UFUNCTION(Server, Reliable)
+	void ServerCheckCompassEvent(APEPlayerController* Requester);
 };

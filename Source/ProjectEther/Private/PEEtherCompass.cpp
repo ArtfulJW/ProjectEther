@@ -5,9 +5,11 @@
 #include "PEGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
-APEEtherCompass::APEEtherCompass()
+APEEtherCompass::APEEtherCompass():
+bIsTakenOut(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -24,6 +26,13 @@ APEEtherCompass::APEEtherCompass()
 	StaticMeshPointer->SetIsReplicated(true);
 }
 
+void APEEtherCompass::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEEtherCompass, bIsTakenOut);
+}
+
 // Called when the game starts or when spawned
 void APEEtherCompass::BeginPlay()
 {
@@ -34,7 +43,10 @@ void APEEtherCompass::BeginPlay()
 void APEEtherCompass::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	UpdateEtherPointer();
+	
+	UpdateCollisionAndVisibility();
 }
 
 void APEEtherCompass::UpdateEtherPointer() const
@@ -60,4 +72,26 @@ void APEEtherCompass::UpdateEtherPointer() const
 	// DrawDebugLine(GetWorld(), FVector(0,0,0), LookAtLocation, FColor::Yellow);
 
 	StaticMeshPointer->SetRelativeRotation(LookAtLocation.Rotation());
+}
+
+void APEEtherCompass::UpdateCollisionAndVisibility()
+{
+	StaticMeshCompassBase->SetVisibility(bIsTakenOut);
+	StaticMeshPointer->SetVisibility(bIsTakenOut);
+
+	if (!bIsTakenOut)
+	{
+		StaticMeshCompassBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StaticMeshPointer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	} 
+	else
+	{
+		StaticMeshCompassBase->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		StaticMeshPointer->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+}
+
+void APEEtherCompass::SetIsCheckingCompass(bool bInBool)
+{
+	bIsTakenOut = bInBool;
 }

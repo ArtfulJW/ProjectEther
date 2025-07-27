@@ -218,6 +218,7 @@ void APEPlayerCharacter::BeginPlay()
 	{
 		EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
 		EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		EtherCompassActor->SetOwner(this);
 	}
 	
 	if (IsLocallyControlled())

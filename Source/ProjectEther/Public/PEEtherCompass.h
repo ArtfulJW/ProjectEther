@@ -19,9 +19,14 @@ public:
 	// Sets default values for this actor's properties
 	APEEtherCompass();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Ether Compass Specs")
+	bool bIsTakenOut;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="StaticMeshComponent")
 	UStaticMeshComponent* StaticMeshCompassBase;
 
@@ -29,4 +34,8 @@ public:
 	UStaticMeshComponent* StaticMeshPointer;
 
 	void UpdateEtherPointer() const;
+	
+	void UpdateCollisionAndVisibility();
+	
+	void SetIsCheckingCompass(bool bInBool);
 };
