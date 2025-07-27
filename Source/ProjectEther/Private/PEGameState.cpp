@@ -40,6 +40,30 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(APEGameState, TeamOneEquipmentCache);
 	DOREPLIFETIME(APEGameState, TeamTwoEquipmentCache);
 	DOREPLIFETIME(APEGameState, Ether);
+	DOREPLIFETIME(APEGameState, EtherSpawners);
+	DOREPLIFETIME(APEGameState, EtherSpawnRegion);
+}
+
+void APEGameState::ServerSubscribeEtherSpawnRegion_Implementation(APEEtherSpawnRegion* SpawnRegion)
+{
+	if (!IsValid(SpawnRegion))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid EtherSpawnRegion: %s"), *SpawnRegion->GetName());
+		return;
+	}
+	
+	EtherSpawnRegion = SpawnRegion;
+}
+
+void APEGameState::ServerSubscribeEtherSpawner_Implementation(APEEtherSpawner* Spawner)
+{
+	if (!IsValid(Spawner))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Spawner: %s"), *Spawner->GetName());
+		return;
+	}
+
+	EtherSpawners.Add(Spawner);
 }
 
 void APEGameState::ServerAssignEther_Implementation(APEEther* InEther)

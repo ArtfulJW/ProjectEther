@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "PEEquipmentCache.h"
 #include "PEEther.h"
+#include "PEEtherSpawner.h"
+#include "PEEtherSpawnRegion.h"
 #include "PEPlayerController.h"
 #include "GameFramework/GameStateBase.h"
 #include "PEGameState.generated.h"
@@ -29,14 +31,20 @@ public:
 	UPROPERTY()
 	TMap<APEPlayerController*, TSubclassOf<APEPlayerCharacter>> PlayerControllerCharacterArray; 
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<APEEquipmentCache*> TeamOneEquipmentCache;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<APEEquipmentCache*> TeamTwoEquipmentCache;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	APEEther* Ether;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	TArray<APEEtherSpawner*> EtherSpawners;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	APEEtherSpawnRegion* EtherSpawnRegion;
 
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
@@ -52,4 +60,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAssignEther(APEEther* InEther);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSubscribeEtherSpawner(APEEtherSpawner* Spawner);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSubscribeEtherSpawnRegion(APEEtherSpawnRegion* SpawnRegion);
 };
