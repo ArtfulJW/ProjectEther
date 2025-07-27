@@ -198,8 +198,10 @@ void APEPlayerController::InteractEvent()
 	}
 	
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetComponentLocation() + PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
+
+	// DrawDebugLine(GetWorld(), PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetComponentLocation() + PC->CameraComponent->GetForwardVector() * 10000, FColor::Black, false, 5.0f);
 
 	if (!IsValid(Actor))
 	{
@@ -225,8 +227,10 @@ void APEPlayerController::DeployInteractableEvent()
 {
 	FHitResult Hit;
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
-	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	GetWorld()->LineTraceSingleByChannel(Hit, PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetComponentLocation() + PC->CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 
+	// DrawDebugLine(GetWorld(), PC->CameraComponent->GetComponentLocation(), PC->CameraComponent->GetComponentLocation() + PC->CameraComponent->GetForwardVector() * 10000, FColor::Black, false, 5.0f);
+	
 	AActor* HitActor = Hit.GetActor();
 	if (!IsValid(HitActor))
 	{

@@ -18,8 +18,8 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
 	UCameraComponent* PlayerCamera = PC->CameraComponent;
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetForwardVector() * 10000, ECC_Pawn);
-	DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetForwardVector() * 10000, FColor::Black);
+	GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, ECC_Pawn);
+	DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, FColor::Black);
 
 
 	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());

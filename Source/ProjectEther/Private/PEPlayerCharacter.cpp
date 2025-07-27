@@ -144,9 +144,11 @@ void APEPlayerCharacter::BeforeDestroy()
 void APEPlayerCharacter::IsLookingAtInteractable()
 {
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
 
+	// DrawDebugLine(GetWorld(), CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000, FColor::Black, false, 5.0f);
+	
 	if (!IsValid(PlayerHUD))
 	{
 		return;
