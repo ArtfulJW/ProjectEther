@@ -139,6 +139,7 @@ void APEPlayerCharacter::BeforeDestroy()
 	PlayerCharacter->ClientRemovePlayerHUD();
 	SpectatorPawn->SetActorLocation(GetActorLocation());
 	PlayerController->Possess(SpectatorPawn);
+	EtherCompassActor->Destroy();
 }
 
 void APEPlayerCharacter::IsLookingAtInteractable()
