@@ -52,7 +52,13 @@ void APEEtherCompass::Tick(float DeltaTime)
 void APEEtherCompass::UpdateEtherPointer() const
 {
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	FVector EtherLocation = GameState->Ether->GetActorLocation();
+	const APEEther* Ether = GameState->Ether;
+	if (!IsValid(Ether))
+	{
+		return;
+	}
+	
+	FVector EtherLocation = Ether->GetActorLocation();
 	FVector ForwardVector = GetActorForwardVector();
 
 	EtherLocation = UKismetMathLibrary::InverseTransformLocation(GetTransform(), EtherLocation);

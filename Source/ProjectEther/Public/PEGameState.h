@@ -46,6 +46,9 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere)
 	APEEtherSpawnRegion* EtherSpawnRegion;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game State Specs")
+	TSubclassOf<APEEther> EtherClass;
+
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
 
