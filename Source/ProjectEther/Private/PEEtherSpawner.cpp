@@ -46,6 +46,10 @@ void APEEtherSpawner::BeginPlay()
 		DrawDebugSphere(GetWorld(), GetActorLocation(), 15, 15, FColor::Emerald, true);
 		GameState->ServerSubscribeEtherSpawner(this);
 	}
+	else
+	{
+		Destroy();
+	}
 }
 
 // Called every frame
