@@ -31,19 +31,7 @@ void APEGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
-	if (!IsValid(World))
-	{
-		return;
-	}
-	
-	int SpawningIndex = FMath::RandRange(0, EtherSpawners.Max() - 1);
-	FVector SpawnLocation = EtherSpawners[SpawningIndex]->GetActorLocation();
-
-	if (!Ether)
-	{
-		Ether = World->SpawnActor<APEEther>(EtherClass, SpawnLocation, FRotator(0, 0, 0));
-	}
+	ServerSpawnEther();
 }
 
 void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -57,6 +45,28 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(APEGameState, EtherSpawnRegion);
 	DOREPLIFETIME(APEGameState, TeamOnePlayerStart);
 	DOREPLIFETIME(APEGameState, TeamTwoPlayerStart);
+}
+
+void APEGameState::ServerClearEther_Implementation()
+{
+	Ether = nullptr;
+}
+
+void APEGameState::ServerSpawnEther_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
+	int SpawningIndex = FMath::RandRange(0, EtherSpawners.Max() - 1);
+	FVector SpawnLocation = EtherSpawners[SpawningIndex]->GetActorLocation();
+
+	if (!Ether)
+	{
+		Ether = World->SpawnActor<APEEther>(EtherClass, SpawnLocation, FRotator(0, 0, 0));
+	}
 }
 
 void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController* Requester)

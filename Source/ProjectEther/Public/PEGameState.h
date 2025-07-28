@@ -82,4 +82,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSpawnPlayerCharacter(APEPlayerController* Requester);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnEther();
+
+	UFUNCTION(Server, Reliable)
+	void ServerClearEther();
 };
