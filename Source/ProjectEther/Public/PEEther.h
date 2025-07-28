@@ -15,24 +15,33 @@ UCLASS()
 class PROJECTETHER_API APEEther : public APEInteractableBase
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	APEEther();
 
-	FTimerHandle EtherPulseTimerHandle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Specs")
-	float fPulseRate;
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:	
+	// Sets default values for this actor's properties
+	APEEther();
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void Interact() override;
+	
+	FTimerHandle EtherPulseTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Specs")
+	float fPulseRate;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Ether Specs")
+	bool bIsDeposited;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEtherPulse();
+
+	 UFUNCTION(Server, Reliable)
+	void ServerSetIsDeposited(bool InBool);
 };

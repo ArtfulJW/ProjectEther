@@ -213,7 +213,16 @@ void APEPlayerController::InteractEvent()
 	if (Actor->IsA(APEEquipmentCache::StaticClass()))
 	{
 		APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
-		if (EquipmentCache && EquipmentCache->bIsDeployed || EquipmentCache->Team != Team)
+		if (!IsValid(EquipmentCache) || EquipmentCache->bIsDeployed || EquipmentCache->Team != Team)
+		{
+			return;
+		}
+	}
+
+	if (Actor->IsA(APEEther::StaticClass()))
+	{
+		APEEther* Ether = Cast<APEEther>(Actor);
+		if (!IsValid(Ether) || Ether->bIsDeposited)
 		{
 			return;
 		}

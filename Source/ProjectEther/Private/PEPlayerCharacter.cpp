@@ -178,6 +178,16 @@ void APEPlayerCharacter::IsLookingAtInteractable()
 			return;
 		}
 	}
+
+	APEEther* Ether = Cast<APEEther>(Actor);
+	if (IsValid(Ether))
+	{
+		if (Ether->bIsDeposited)
+		{
+			TextBlock->SetText(FText::FromString(""));
+			return;
+		}	
+	}
 	
 	if (Actor == CarriedInteractableActor)
 	{

@@ -94,6 +94,7 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	Ether->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	USceneComponent* TargetSceneComponent = Cast<USceneComponent>(EtherDepositSceneComponents[NumEther]);
 	Ether->AttachToComponent(TargetSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	Ether->ServerSetIsDeposited(true);
 	Ether->RemoveCarryEffect();
 	
 	PlayerCharacter->CarriedInteractableActor = nullptr;
