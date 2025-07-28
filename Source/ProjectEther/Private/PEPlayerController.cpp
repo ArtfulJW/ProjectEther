@@ -33,6 +33,8 @@ void APEPlayerController::BeginPlay()
 	{
 		InputSystem->AddMappingContext(InputMapping, 0);
 	}
+
+	GameState->ServerSpawnPlayerCharacter(this);
 }
 
 void APEPlayerController::SetupInputComponent()

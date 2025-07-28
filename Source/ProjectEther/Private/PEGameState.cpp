@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PEGameState.h"
-
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
@@ -56,6 +55,63 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(APEGameState, Ether);
 	DOREPLIFETIME(APEGameState, EtherSpawners);
 	DOREPLIFETIME(APEGameState, EtherSpawnRegion);
+	DOREPLIFETIME(APEGameState, TeamOnePlayerStart);
+	DOREPLIFETIME(APEGameState, TeamTwoPlayerStart);
+}
+
+void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController* Requester)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
+	TArray<APEPlayerStart*> CorrectTeam;
+	switch (Requester->Team)
+	{
+		case TeamOne:
+			CorrectTeam = TeamOnePlayerStart;
+			break;
+		case TeamTwo:
+			CorrectTeam = TeamTwoPlayerStart;
+			break;
+		default:
+			return;
+	}
+	
+	int SpawningIndex = FMath::RandRange(0, CorrectTeam.Max() - 1);
+	APEPlayerStart* SelectedPlayerStart = CorrectTeam[SpawningIndex];
+	if (!IsValid(SelectedPlayerStart))
+	{
+		return;
+	}
+	
+	APEPlayerCharacter* SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+	if (!IsValid(SpawnedPlayerCharacter))
+	{
+		return;
+	}
+
+	Requester->Possess(SpawnedPlayerCharacter);
+}
+
+void APEGameState::SubscribePlayerStart_Implementation(APEPlayerStart* PlayerStart, const ETeam InTeam)
+{
+	if (!IsValid(PlayerStart))
+	{
+		return;
+	}
+	
+	switch (InTeam)
+	{
+		case TeamOne:
+			TeamOnePlayerStart.Add(PlayerStart);
+			return;
+		case TeamTwo:
+			TeamTwoPlayerStart.Add(PlayerStart);
+			return;
+	}
 }
 
 void APEGameState::ServerSubscribeEtherSpawnRegion_Implementation(APEEtherSpawnRegion* SpawnRegion)

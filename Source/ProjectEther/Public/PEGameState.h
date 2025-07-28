@@ -8,6 +8,7 @@
 #include "PEEtherSpawner.h"
 #include "PEEtherSpawnRegion.h"
 #include "PEPlayerController.h"
+#include "PEPlayerStart.h"
 #include "GameFramework/GameStateBase.h"
 #include "PEGameState.generated.h"
 
@@ -49,6 +50,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game State Specs")
 	TSubclassOf<APEEther> EtherClass;
 
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	TArray<APEPlayerStart*> TeamOnePlayerStart;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	TArray<APEPlayerStart*> TeamTwoPlayerStart;
+
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
 
@@ -69,4 +76,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSubscribeEtherSpawnRegion(APEEtherSpawnRegion* SpawnRegion);
+
+	UFUNCTION(Server, Reliable)
+	void SubscribePlayerStart(APEPlayerStart* PlayerStart, ETeam InTeam);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnPlayerCharacter(APEPlayerController* Requester);
 };

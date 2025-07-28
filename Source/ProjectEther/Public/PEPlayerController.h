@@ -59,6 +59,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 
+	/**
+	 * TODO: TEMPORARILY HERE TO SPAWN PLAYER CHARACTER. REMOVE LATER
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Character")
+	TSubclassOf<APEPlayerCharacter> PEPlayerCharacterClass;
+	
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TEnumAsByte<ETeam> Team;
 	
