@@ -47,6 +47,59 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(APEGameState, TeamTwoPlayerStart);
 }
 
+void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
+	APEEquipmentCache* SpawnedActor = nullptr;
+	switch (EquipmentCacheTeam)
+	{
+	case TeamOne:
+		SpawnedActor = World->SpawnActor<APEEquipmentCache>(APEEquipmentCache::StaticClass(), TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		break;
+	case TeamTwo:
+		SpawnedActor = World->SpawnActor<APEEquipmentCache>(APEEquipmentCache::StaticClass(), TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		break;
+	}
+
+	if (IsValid(SpawnedActor))
+	{
+		SpawnedActor->Team = EquipmentCacheTeam;
+	}
+}
+
+void APEGameState::SubscribeEquipmentCacheSpawner_Implementation(APEEquipmentCacheSpawner* EquipmentCacheSpawner, ETeam EquipmentCacheTeam)
+{
+	switch (EquipmentCacheTeam)
+	{
+	case TeamOne:
+		TeamOneEquipmentSpawner = EquipmentCacheSpawner;
+		break;
+	case TeamTwo:
+		TeamTwoEquipmentSpawner = EquipmentCacheSpawner;
+		break;
+	}
+}
+
+void APEGameState::ServerRemoveEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache, ETeam EquipmentCacheTeam)
+{
+	switch (EquipmentCacheTeam)
+	{
+		case TeamOne:
+		TeamOneEquipmentCache.Remove(EquipmentCache);
+			break;
+		case TeamTwo:
+		TeamTwoEquipmentCache.Remove(EquipmentCache);
+			break;
+	}
+	
+	// SpawnEquipmentCache(EquipmentCacheTeam);
+}
+
 void APEGameState::ServerClearEther_Implementation()
 {
 	Ether = nullptr;

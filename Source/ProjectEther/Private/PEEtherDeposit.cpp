@@ -2,8 +2,10 @@
 
 #include "PEEtherDeposit.h"
 #include "PEEther.h"
+#include "PEGameMode.h"
 #include "PEGameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 APEEtherDeposit::APEEtherDeposit():
@@ -11,7 +13,8 @@ NumEther(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	bReplicates = true;
+	
 	EtherDepositOne = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit One"));
 	EtherDepositTwo = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit Two"));
 	EtherDepositThree = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit Three"));
@@ -26,6 +29,13 @@ NumEther(0)
 	BoxComponent->SetupAttachment(RootComponent);
 
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APEEtherDeposit::DepositEther);
+}
+
+void APEEtherDeposit::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEEtherDeposit, NumEther)
 }
 
 // Called when the game starts or when spawned
@@ -105,4 +115,15 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	GameState->ServerSpawnEther();
 
 	NumEther++;
+	ServerCheckEndGame();
+}
+
+void APEEtherDeposit::ServerCheckEndGame_Implementation()
+{
+	APEGameMode* GameMode = Cast<APEGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (NumEther >= GameMode->GetNumEtherToWin())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Game is ready to end"));
+		
+	}
 }

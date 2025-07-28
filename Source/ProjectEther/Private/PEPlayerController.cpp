@@ -296,6 +296,14 @@ void APEPlayerController::ServerCheckCompassEvent_Implementation(APEPlayerContro
 void APEPlayerController::ServerDestroyEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache)
 {
 	EquipmentCache->Destroy();
+
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	if (!IsValid(GameState))
+	{
+		return;
+	}
+
+	GameState->ServerRemoveEquipmentCache(EquipmentCache, EquipmentCache->Team);
 }
 
 void APEPlayerController::ServerDeployInteractable_Implementation(APEInteractableBase* InActor)

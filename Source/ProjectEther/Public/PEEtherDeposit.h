@@ -20,6 +20,8 @@ protected:
 public:
 	// Sets default values for this actor's properties
 	APEEtherDeposit();
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -29,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
 	TEnumAsByte<ETeam> Team; 
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	int NumEther;
 	
 	UPROPERTY(VisibleAnywhere, Category="Ether Deposit Specs")
@@ -50,6 +52,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
 	UStaticMeshComponent* StaticMeshComponent;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Ether Deposit Functions")
 	void DepositEther(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(Server, Reliable)
+	void ServerCheckEndGame();
 };

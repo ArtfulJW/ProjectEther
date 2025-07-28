@@ -35,7 +35,13 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	}
 
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(this->GetController());
+	if (GameState->TeamOneEquipmentCache.IsEmpty() || GameState->TeamTwoEquipmentCache.IsEmpty())
+	{
+		GameState->ServerSpawnPlayerCharacter(PlayerController);
+		return;
+	}
+	
 	APEEquipmentCache* EquipmentCache = nullptr;
 	switch (Requester->Team)
 	{
@@ -47,10 +53,10 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 			break;
 	}
 
-	if (!IsValid(EquipmentCache))
+	if (IsValid(EquipmentCache) && !EquipmentCache->bIsDeployed)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There are no suitable spawners"))
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("Undeployed Team EquipmentCache, spawning at main base"))
+		GameState->ServerSpawnPlayerCharacter(PlayerController);
 	}
 	
 	EquipmentCache->SpawnPlayer(Requester);

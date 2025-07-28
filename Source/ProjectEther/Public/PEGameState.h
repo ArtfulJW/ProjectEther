@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PEEquipmentCache.h"
+#include "PEEquipmentCacheSpawner.h"
 #include "PEEther.h"
 #include "PEEtherSpawner.h"
 #include "PEEtherSpawnRegion.h"
@@ -39,8 +40,14 @@ public:
 	TArray<APEEquipmentCache*> TeamTwoEquipmentCache;
 
 	UPROPERTY(Replicated, VisibleAnywhere)
-	APEEther* Ether;
+	APEEquipmentCacheSpawner* TeamOneEquipmentSpawner;
 
+	UPROPERTY(Replicated, VisibleAnywhere)
+	APEEquipmentCacheSpawner* TeamTwoEquipmentSpawner;
+	
+	UPROPERTY(Replicated, VisibleAnywhere)
+	APEEther* Ether;
+	
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<APEEtherSpawner*> EtherSpawners;
 
@@ -88,4 +95,13 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerClearEther();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRemoveEquipmentCache(APEEquipmentCache* EquipmentCache, ETeam EquipmentCacheTeam);
+
+	UFUNCTION(Server, Reliable)
+	void SubscribeEquipmentCacheSpawner(APEEquipmentCacheSpawner* EquipmentCacheSpawner, ETeam EquipmentCacheTeam);
+
+	UFUNCTION()
+	void SpawnEquipmentCache(ETeam EquipmentCacheTeam);
 };

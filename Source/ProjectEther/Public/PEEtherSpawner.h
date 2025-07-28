@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "GameFramework/Actor.h"
 #include "PEEtherSpawner.generated.h"
 
@@ -23,7 +24,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Box Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Spawner Spec")
 	UBoxComponent* BoxComponent;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Spawner Spec")
+	UTextRenderComponent* TextRenderComponent;
 };

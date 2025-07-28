@@ -15,8 +15,10 @@ APEEtherSpawner::APEEtherSpawner()
 	bReplicates = true;
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-
+	TextRenderComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRenderComponent"));
+	
 	BoxComponent->SetupAttachment(RootComponent);
+	TextRenderComponent->SetupAttachment(BoxComponent);
 }
 
 // Called when the game starts or when spawned
@@ -50,6 +52,8 @@ void APEEtherSpawner::BeginPlay()
 	{
 		Destroy();
 	}
+
+	TextRenderComponent->Text = FText::FromString(TEXT("Ether Spawner"));
 }
 
 // Called every frame
