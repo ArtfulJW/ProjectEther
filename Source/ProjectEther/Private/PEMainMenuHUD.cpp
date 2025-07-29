@@ -55,5 +55,7 @@ void UPEMainMenuHUD::ServerRequestTravel_Implementation()
 		return;
 	}
 	
-	World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MinimalMap.MinimalMap'"), true);
+	// World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MinimalMap.MinimalMap'"), true);
+
+	World->Exec(GetWorld(), TEXT("servertravel MinimalMap"));
 }
