@@ -5,6 +5,7 @@
 APEGameMode::APEGameMode():
 NumEtherToWin(3)
 {
+	bUseSeamlessTravel = true;
 }
 
 int APEGameMode::GetNumEtherToWin() const

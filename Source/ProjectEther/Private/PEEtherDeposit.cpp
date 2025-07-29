@@ -9,7 +9,7 @@
 
 // Sets default values
 APEEtherDeposit::APEEtherDeposit():
-NumEther(0)
+NumDepositedEther(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -35,7 +35,7 @@ void APEEtherDeposit::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APEEtherDeposit, NumEther)
+	DOREPLIFETIME(APEEtherDeposit, NumDepositedEther)
 }
 
 // Called when the game starts or when spawned
@@ -73,7 +73,7 @@ void APEEtherDeposit::Destroyed()
 void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp,
                                    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (NumEther >= 3)
+	if (NumDepositedEther >= 3)
 	{
 		return;
 	}
@@ -102,7 +102,7 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	}
 	
 	Ether->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	USceneComponent* TargetSceneComponent = Cast<USceneComponent>(EtherDepositSceneComponents[NumEther]);
+	USceneComponent* TargetSceneComponent = Cast<USceneComponent>(EtherDepositSceneComponents[NumDepositedEther]);
 	Ether->AttachToComponent(TargetSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	Ether->ServerSetIsDeposited(true);
 	Ether->RemoveCarryEffect();
@@ -115,16 +115,22 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	GameState->ServerSpawnEther();
 	GameState->SpawnEquipmentCache(PlayerController->Team);
 
-	NumEther++;
+	NumDepositedEther++;
 	ServerCheckEndGame();
 }
 
 void APEEtherDeposit::ServerCheckEndGame_Implementation()
 {
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
 	APEGameMode* GameMode = Cast<APEGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (NumEther >= GameMode->GetNumEtherToWin())
+	if (NumDepositedEther >= GameMode->GetNumEtherToWin())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game is ready to end"));
-		
+		World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MainMenuMap.MainMenuMap"));
 	}
 }

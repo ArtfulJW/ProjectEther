@@ -32,7 +32,7 @@ public:
 	TEnumAsByte<ETeam> Team; 
 	
 	UPROPERTY(Replicated, VisibleAnywhere)
-	int NumEther;
+	int NumDepositedEther;
 	
 	UPROPERTY(VisibleAnywhere, Category="Ether Deposit Specs")
 	TArray<USceneComponent*> EtherDepositSceneComponents;
