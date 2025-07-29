@@ -22,15 +22,17 @@ void APEMainMenuPawn::BeginPlay()
 	{
 		return;
 	}
-	
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
-	MainMenuHUD = CreateWidget<UPEMainMenuHUD>(PlayerController, MainMenuHUDClass);
-	if (MainMenuHUD)
-	{
-		MainMenuHUD->AddToViewport();
-	}
 
-	PlayerController->SetShowMouseCursor(true);
+	if (GetNetMode() >= NM_Client)
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
+		MainMenuHUD = CreateWidget<UPEMainMenuHUD>(PlayerController, MainMenuHUDClass);
+		if (MainMenuHUD)
+		{
+			MainMenuHUD->AddToViewport();
+		}
+		PlayerController->SetShowMouseCursor(true);
+	}
 }
 
 // Called every frame

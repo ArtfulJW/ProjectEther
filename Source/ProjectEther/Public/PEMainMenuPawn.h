@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PEMainMenuHUD.h"
+#include "Components/Button.h"
 #include "GameFramework/Actor.h"
 #include "PEMainMenuPawn.generated.h"
 
