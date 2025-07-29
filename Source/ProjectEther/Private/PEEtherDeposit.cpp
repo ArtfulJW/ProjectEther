@@ -131,6 +131,7 @@ void APEEtherDeposit::ServerCheckEndGame_Implementation()
 	if (NumDepositedEther >= GameMode->GetNumEtherToWin())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game is ready to end"));
-		World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MainMenuMap.MainMenuMap"));
+		// World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MainMenuMap.MainMenuMap"));
+		UGameplayStatics::OpenLevel(this, FName(*World->GetName()), false);
 	}
 }

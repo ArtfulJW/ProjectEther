@@ -34,7 +34,6 @@ protected:
 	UInputMappingContext* InputMapping;
 
 public:
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* MoveAction;
 	

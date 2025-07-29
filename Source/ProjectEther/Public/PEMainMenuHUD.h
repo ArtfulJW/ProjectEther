@@ -31,4 +31,7 @@ public:
 
 	UFUNCTION()
 	void ShowLoadoutScreen();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestTravel();
 };
