@@ -4,6 +4,11 @@
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
+APEGameState::APEGameState():
+fEquipmentCacheSpawnDelay(5.0f)
+{
+}
+
 void APEGameState::AssignTeamToPlayerController_Implementation(APEPlayerController* Requester)
 {
 	Requester->Team = TeamOne;
@@ -59,10 +64,10 @@ void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
 	switch (EquipmentCacheTeam)
 	{
 	case TeamOne:
-		SpawnedActor = World->SpawnActor<APEEquipmentCache>(APEEquipmentCache::StaticClass(), TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
 		break;
 	case TeamTwo:
-		SpawnedActor = World->SpawnActor<APEEquipmentCache>(APEEquipmentCache::StaticClass(), TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
 		break;
 	}
 
@@ -87,17 +92,30 @@ void APEGameState::SubscribeEquipmentCacheSpawner_Implementation(APEEquipmentCac
 
 void APEGameState::ServerRemoveEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache, ETeam EquipmentCacheTeam)
 {
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this, FName("SpawnEquipmentCache"), EquipmentCacheTeam);
+	
 	switch (EquipmentCacheTeam)
 	{
 		case TeamOne:
-		TeamOneEquipmentCache.Remove(EquipmentCache);
+			TeamOneEquipmentCache.Remove(EquipmentCache);
 			break;
 		case TeamTwo:
-		TeamTwoEquipmentCache.Remove(EquipmentCache);
+			TeamTwoEquipmentCache.Remove(EquipmentCache);
 			break;
 	}
-	
-	// SpawnEquipmentCache(EquipmentCacheTeam);
+
+	if (TeamOneEquipmentCache.IsEmpty() || TeamTwoEquipmentCache.IsEmpty())
+	{
+		World->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, fEquipmentCacheSpawnDelay, false);
+	}
 }
 
 void APEGameState::ServerClearEther_Implementation()

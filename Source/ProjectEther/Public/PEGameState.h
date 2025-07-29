@@ -22,10 +22,14 @@ class PROJECTETHER_API APEGameState : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-
+	APEGameState();
+	
 	virtual void BeginPlay() override;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game State Specifications")
+	float fEquipmentCacheSpawnDelay;
 	
 	/*
 	 * TODO: REMOVE DEPRACATED AND ALL ASSOCIATED
@@ -63,6 +67,9 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
 	TArray<APEPlayerStart*> TeamTwoPlayerStart;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game State Specs")
+	TSubclassOf<APEEquipmentCache> EquipmentCacheClass;
+	
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
 

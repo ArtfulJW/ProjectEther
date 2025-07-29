@@ -113,6 +113,7 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	GameState->ServerClearEther();
 	GameState->ServerSpawnEther();
+	GameState->SpawnEquipmentCache(PlayerController->Team);
 
 	NumEther++;
 	ServerCheckEndGame();
