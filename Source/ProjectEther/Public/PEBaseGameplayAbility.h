@@ -18,5 +18,11 @@ public:
 	
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+	virtual APEPlayerCharacter* LineTraceAbility(const APEPlayerCharacter* PC, const FGameplayAbilityActorInfo* ActorInfo, float fRange, FColor Color);
+
+	virtual void DamageHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount);
+
+	virtual void HealHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount);
+	
 	float DetermineDamageMultiplier(const EDamageDirection DamageDirection) const;
 };

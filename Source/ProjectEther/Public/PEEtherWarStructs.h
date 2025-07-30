@@ -19,3 +19,12 @@ inline FString ETeam_ToString(ETeam e)
 	default: throw std::invalid_argument("Unimplemented DamageDirection");
 	}
 }
+
+UENUM(Blueprintable)
+enum EClassType
+{
+	Base,
+	Berserker,
+	Mage,
+	Priest
+};

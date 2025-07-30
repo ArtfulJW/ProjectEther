@@ -34,7 +34,10 @@ void APEPlayerController::BeginPlay()
 		InputSystem->AddMappingContext(InputMapping, 0);
 	}
 
-	GameState->ServerSpawnPlayerCharacter(this);
+	
+	
+	// TODO: CALL SERVERSPAWNPLAYERCHARACTER WHEN I CLICK THE UUSERWIDGET BUTTON TO SELECT WHICH CLASS I WANT TO PLAY
+	// GameState->ServerSpawnPlayerCharacter(this);
 }
 
 void APEPlayerController::SetupInputComponent()

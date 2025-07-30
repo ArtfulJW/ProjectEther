@@ -140,7 +140,7 @@ void APEGameState::ServerSpawnEther_Implementation()
 	}
 }
 
-void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController* Requester)
+void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController* Requester, EClassType ClassType)
 {
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
@@ -168,12 +168,29 @@ void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController
 		return;
 	}
 	
-	APEPlayerCharacter* SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+	APEPlayerCharacter* SpawnedPlayerCharacter = nullptr;
+
+	switch (ClassType)
+	{
+		case Base:
+			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			break;
+		case Berserker:
+			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			break;
+		case Mage:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			break;
+		case Priest:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			break;
+	}
+	
 	if (!IsValid(SpawnedPlayerCharacter))
 	{
 		return;
 	}
-
+	
 	Requester->Possess(SpawnedPlayerCharacter);
 }
 

@@ -95,7 +95,7 @@ public:
 	void SubscribePlayerStart(APEPlayerStart* PlayerStart, ETeam InTeam);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSpawnPlayerCharacter(APEPlayerController* Requester);
+	void ServerSpawnPlayerCharacter(APEPlayerController* Requester, EClassType ClassType);
 
 	UFUNCTION(Server, Reliable)
 	void ServerSpawnEther();

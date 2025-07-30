@@ -38,7 +38,7 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(this->GetController());
 	if (GameState->TeamOneEquipmentCache.IsEmpty() || GameState->TeamTwoEquipmentCache.IsEmpty())
 	{
-		GameState->ServerSpawnPlayerCharacter(PlayerController);
+		GameState->ServerSpawnPlayerCharacter(PlayerController, PlayerController->CharacterClass);
 		return;
 	}
 	
@@ -56,7 +56,7 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	if (IsValid(EquipmentCache) && !EquipmentCache->bIsDeployed)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Undeployed Team EquipmentCache, spawning at main base"))
-		GameState->ServerSpawnPlayerCharacter(PlayerController);
+		GameState->ServerSpawnPlayerCharacter(PlayerController, PlayerController->CharacterClass);
 	}
 	
 	EquipmentCache->SpawnPlayer(Requester);

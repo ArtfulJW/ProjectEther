@@ -20,15 +20,14 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, ECC_Pawn);
 	DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, FColor::Black);
-
-
+	
 	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
 	if (!HitActor)
 	{
 		return;
 	}
 	APEPlayerController* HitPlayerController = Cast<APEPlayerController>(HitActor->GetController());
-
+	
 	DrawDebugSphere(GetWorld(), Hit.Location, 15, 15,FColor::Black);
 		
 	if (HitActor && PC->GetController() != HitPlayerController)
@@ -40,6 +39,58 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	
 		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
 	}
+	
+	// APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
+	// APEPlayerCharacter* HitActor = LineTraceAbility(PC, ActorInfo, 5000, FColor::Red);
+	// DamageHealth(PC,Hit, 1.0f);
+}
+
+void UPEBaseGameplayAbility::DamageHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount)
+{
+	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
+	
+	EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
+	float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
+	AttributeSet->SetHealth(AttributeSet->GetHealth() - fAmount * DamageMultipler);
+	
+	UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
+}
+
+void UPEBaseGameplayAbility::HealHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount)
+{
+	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
+	
+	EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
+	float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
+	AttributeSet->SetHealth(AttributeSet->GetHealth() + fAmount * DamageMultipler);
+	
+	UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
+}
+
+ APEPlayerCharacter* UPEBaseGameplayAbility::LineTraceAbility(const APEPlayerCharacter* PC, const FGameplayAbilityActorInfo* ActorInfo, float fRange, FColor Color)
+{
+	UCameraComponent* PlayerCamera = PC->CameraComponent;
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * fRange, ECC_Pawn);
+	DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * fRange, Color);
+	
+	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	if (!HitActor)
+	{
+		return nullptr;
+	}
+	APEPlayerController* HitPlayerController = Cast<APEPlayerController>(HitActor->GetController());
+
+	DrawDebugSphere(GetWorld(), Hit.Location, 15, 15, Color);
+		
+	if (HitActor && PC->GetController() != HitPlayerController)
+	{
+		return HitActor;
+	}
+
+	return nullptr;
 }
 
 float UPEBaseGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection) const
