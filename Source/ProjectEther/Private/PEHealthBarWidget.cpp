@@ -9,8 +9,8 @@ void UPEHealthBarWidget::NativeConstruct()
 
 	if (IsValid(PlayerCharacterRef))
 	{
-		HealthBar->AddBinding(&UPEHealthBarWidget::ServerUpdateHealthBar, PlayerCharacterRef,);
-		HealthBar.Binding
+		// HealthBar->AddBinding(&UPEHealthBarWidget::ServerUpdateHealthBar, PlayerCharacterRef,);
+		// HealthBar.Binding
 	}
 }
 
