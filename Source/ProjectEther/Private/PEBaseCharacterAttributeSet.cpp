@@ -33,6 +33,11 @@ void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 	else
 	{
 		Health = InHealth;
+		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(PC->HealthBarWidgetComponent->GetWidget());
+		if (IsValid(HealthBarWidget))
+		{
+			HealthBarWidget->ServerUpdateHealthBar(InHealth/100.0f);
+		}
 	}
 
 	if (Health.GetCurrentValue() <= 0.0f)

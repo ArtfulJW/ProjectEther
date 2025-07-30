@@ -7,10 +7,11 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEEtherCompass.h"
+#include "PEHealthBarWidget.h"
 #include "PEPlayerHUD.h"
+#include "Components/WidgetComponent.h"
 #include "PEPlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -123,6 +124,12 @@ public:
 	UPROPERTY()
 	UPEPlayerHUD* PlayerHUD;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health Bar Widget Specs")
+	TSubclassOf<UPEHealthBarWidget> HealthBarWidgetClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health Bar Widget Specs")
+	UWidgetComponent* HealthBarWidgetComponent;
+	
 	UPROPERTY(Replicated)
 	AActor* CarriedInteractableActor;
 	

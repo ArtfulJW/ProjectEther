@@ -22,18 +22,22 @@ APEPlayerCharacter::APEPlayerCharacter():
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AttributeSet = CreateDefaultSubobject<UPEBaseCharacterAttributeSet>(TEXT("AttributeSet"));
 	CarrySceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CarrySceneComponent"));
 	EtherCompassSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("EtherCompassSceneComponent"));
-
+	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
 	
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	CameraComponent->SetupAttachment(RootComponent);
 	CarrySceneComponent->SetupAttachment(RootComponent);
 	EtherCompassSceneComponent->SetupAttachment(RootComponent);
+	HealthBarWidgetComponent->SetupAttachment(RootComponent);
+
+	HealthBarWidgetComponent->SetIsReplicated(true);
 }
 
 UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
@@ -232,6 +236,16 @@ void APEPlayerCharacter::BeginPlay()
 		EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
 		EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 		EtherCompassActor->SetOwner(this);
+	}
+
+	if (IsValid(HealthBarWidgetClass))
+	{
+		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidgetClass());
+		HealthBarWidget->PlayerCharacterRef = this;
+		
+		HealthBarWidgetComponent->SetDrawAtDesiredSize(true);
+		HealthBarWidgetComponent->SetWidgetClass(HealthBarWidgetClass);
+		HealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	}
 	
 	if (IsLocallyControlled())
