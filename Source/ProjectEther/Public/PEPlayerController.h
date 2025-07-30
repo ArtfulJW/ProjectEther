@@ -9,6 +9,7 @@
 #include "InputMappingContext.h"
 #include "PEInteractableBase.h"
 #include "PEEtherWarStructs.h"
+#include "PEPickClassHUD.h"
 #include "PEPlayerController.generated.h"
 
 class APEEquipmentCache;
@@ -58,15 +59,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 
-	EClassType CharacterClass = Base;
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Class Spec")
+	TEnumAsByte<EClassType> CharacterClass = Base;
 
 	/**
 	 * TODO: REMOVE LATER AFTER PROTOTYPE
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
-	TSubclassOf<UUserWidget> PEPickClassHUDClass;
+	TSubclassOf<UPEPickClassHUD> PEPickClassHUDClass;
 
-	UUserWidget*PEPickClassHUD;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="HUD")
+	UUserWidget* PEPickClassHUD;
 	
 	/**
 	 * TODO: TEMPORARILY HERE TO SPAWN PLAYER CHARACTER. REMOVE LATER
@@ -136,4 +139,22 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerCheckCompassEvent(APEPlayerController* Requester);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetupInputControls();
+	
+	UFUNCTION(Server, Reliable)
+	void RequestSpawn();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetCharacterClass(APEPlayerController* Requester, EClassType InClassType);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRemovePickClassHUD();
+
+	UFUNCTION(Server, Reliable)
+	void RequestTeamAssignment();
+	
+protected:
+	virtual void OnPossess(APawn* APawn) override;
 };

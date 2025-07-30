@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "PEPickClassHUD.generated.h"
 
+class APEPlayerController;
 /**
  * 
  */
@@ -28,6 +29,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pick Class HUD")
 	TObjectPtr<UButton> PriestClassButton;
 
-	UFUNCTION(Server, Reliable)
-	void RequestSpawnPlayerCharacter();
+	UFUNCTION()
+	void SetBerserkerClassAndRequestSpawn();
+
+	UFUNCTION()
+	void SetMageClassAndRequestSpawn();
+
+	UFUNCTION()
+	void SetPriestClassAndRequestSpawn();
 };

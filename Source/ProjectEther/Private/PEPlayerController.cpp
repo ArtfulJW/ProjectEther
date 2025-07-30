@@ -18,26 +18,30 @@ class APEPlayerCharacter;
 void APEPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	GameState->ServerAssignPlayerToTeam(this);
-	
-	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	if (!IsValid(LocalPlayer))
+
+	if (IsLocalController())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid LocalPlayer"));
-	}
-	
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-	if (IsValid(InputSystem) && IsValid(InputMapping))
-	{
-		InputSystem->AddMappingContext(InputMapping, 0);
+		PEPickClassHUD = CreateWidget<UPEPickClassHUD>(this, PEPickClassHUDClass);
+		PEPickClassHUD->AddToViewport();
+		SetShowMouseCursor(true);
 	}
 
-	
-	
-	// TODO: CALL SERVERSPAWNPLAYERCHARACTER WHEN I CLICK THE UUSERWIDGET BUTTON TO SELECT WHICH CLASS I WANT TO PLAY
-	// GameState->ServerSpawnPlayerCharacter(this);
+	// APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	// GameState->ServerAssignPlayerToTeam(this);
+	//
+	// const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	// if (!IsValid(LocalPlayer))
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Invalid LocalPlayer"));
+	// }
+	//
+	// UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+	// if (IsValid(InputSystem) && IsValid(InputMapping))
+	// {
+	// 	InputSystem->AddMappingContext(InputMapping, 0);
+	// }
+	//
+	// GameState->ServerSpawnPlayerCharacter(this, this->CharacterClass);
 }
 
 void APEPlayerController::SetupInputComponent()
@@ -59,6 +63,7 @@ void APEPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APEPlayerController, Team);
+	DOREPLIFETIME(APEPlayerController, CharacterClass);
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -282,6 +287,54 @@ void APEPlayerController::SubscribeToGameState(TSubclassOf<APEPlayerCharacter> P
 	{
 		GameState->PlayerControllerCharacterArray.Add(this, PossessedCharacter);
 	}
+}
+
+void APEPlayerController::ClientSetupInputControls_Implementation()
+{
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!IsValid(LocalPlayer))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid LocalPlayer"));
+	}
+	
+	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+	if (IsValid(InputSystem) && IsValid(InputMapping))
+	{
+		InputSystem->AddMappingContext(InputMapping, 0);
+	}
+}
+
+void APEPlayerController::RequestSpawn_Implementation()
+{
+	APEGameState* GameState = Cast<APEGameState>(GetWorld()->GetGameState());
+	GameState->ServerSpawnPlayerCharacter(this, this->CharacterClass);
+}
+
+void APEPlayerController::ServerSetCharacterClass_Implementation(APEPlayerController* Requester, EClassType InClassType)
+{
+	Requester->CharacterClass = InClassType;
+}
+
+void APEPlayerController::ClientRemovePickClassHUD_Implementation()
+{
+	if (IsValid(PEPickClassHUD))
+	{
+		PEPickClassHUD->RemoveFromParent();
+		SetShowMouseCursor(false);
+	}
+}
+
+void APEPlayerController::RequestTeamAssignment_Implementation()
+{
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	GameState->ServerAssignPlayerToTeam(this);
+}
+
+void APEPlayerController::OnPossess(APawn* APawn)
+{
+	Super::OnPossess(APawn);
+
+	ClientRemovePickClassHUD();
 }
 
 void APEPlayerController::ServerCheckCompassEvent_Implementation(APEPlayerController* Requester)

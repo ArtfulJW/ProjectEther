@@ -10,15 +10,41 @@ void UPEPickClassHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	BerserkerClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::RequestSpawnPlayerCharacter);
-	MageClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::RequestSpawnPlayerCharacter);
-	PriestClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::RequestSpawnPlayerCharacter);
+	BerserkerClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetBerserkerClassAndRequestSpawn);
+	MageClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetMageClassAndRequestSpawn);
+	PriestClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetPriestClassAndRequestSpawn);
 }
 
-void UPEPickClassHUD::RequestSpawnPlayerCharacter_Implementation()
+void UPEPickClassHUD::SetBerserkerClassAndRequestSpawn()
 {
-	APEPlayerCharacter* PlayerCharacter = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	APEPlayerController* PlayerController = Cast<APEPlayerController>(PlayerCharacter->GetController());
-	APEGameState* GameState = Cast<APEGameState>(GetWorld()->GetGameState());
-	GameState->ServerSpawnPlayerCharacter(PlayerController, PlayerController->CharacterClass);
+	const ULocalPlayer* LocalPlayer = GetOwningLocalPlayer();
+	if (!IsValid(LocalPlayer))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid LocalPlayer"));
+		return;
+	}
+	
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
+	PlayerController->ServerSetCharacterClass(PlayerController, Berserker);
+	PlayerController->RequestTeamAssignment();
+	PlayerController->ClientSetupInputControls();
+	PlayerController->RequestSpawn();
+}
+
+void UPEPickClassHUD::SetMageClassAndRequestSpawn()
+{
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
+	PlayerController->ServerSetCharacterClass(PlayerController, Mage);
+	PlayerController->RequestTeamAssignment();
+	PlayerController->ClientSetupInputControls();
+	PlayerController->RequestSpawn();
+}
+
+void UPEPickClassHUD::SetPriestClassAndRequestSpawn()
+{
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
+	PlayerController->ServerSetCharacterClass(PlayerController, Priest);
+	PlayerController->RequestTeamAssignment();
+	PlayerController->ClientSetupInputControls();
+	PlayerController->RequestSpawn();
 }

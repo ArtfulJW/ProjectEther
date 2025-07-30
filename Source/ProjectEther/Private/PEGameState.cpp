@@ -179,10 +179,10 @@ void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController
 			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
 		case Mage:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
 		case Priest:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
+			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
 	}
 	
