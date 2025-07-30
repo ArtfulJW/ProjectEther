@@ -26,7 +26,14 @@ void UPEBaseCharacterAttributeSet::OnRep_Speed(const FGameplayAttributeData& Old
 void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
-	Health = InHealth;
+	if (InHealth >= 100.0f)
+	{
+		Health = 100.0f;
+	}
+	else
+	{
+		Health = InHealth;
+	}
 
 	if (Health.GetCurrentValue() <= 0.0f)
 	{
