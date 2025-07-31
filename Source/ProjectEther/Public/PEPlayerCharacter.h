@@ -65,7 +65,7 @@ public:
 	USceneComponent* CarrySceneComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
-	UAttributeSet* AttributeSet;
+	UPEBaseCharacterAttributeSet* AttributeSet;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
 	UAbilitySystemComponent* AbilitySystemComponent;
@@ -143,6 +143,9 @@ public:
 	void BeforeDestroy();
 
 	void IsLookingAtInteractable();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Health Bar")
+	void MulticastUpdateHealthBar();
 	
 protected:
 	// Called when the game starts or when spawned

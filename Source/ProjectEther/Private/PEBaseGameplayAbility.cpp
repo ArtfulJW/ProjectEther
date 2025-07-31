@@ -36,7 +36,8 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
 		float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
 		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
-	
+		HitActor->MulticastUpdateHealthBar();
+		
 		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
 	}
 	

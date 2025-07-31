@@ -36,5 +36,6 @@ void UPEDamageLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	if (HitActor && PC->GetController() != HitPlayerController)
 	{
 		DamageHealth(HitActor, Hit, fDamage);
+		HitActor->MulticastUpdateHealthBar();
 	}
 }

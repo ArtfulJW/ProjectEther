@@ -208,6 +208,18 @@ void APEPlayerCharacter::IsLookingAtInteractable()
 	TextBlock->SetText(FText::FromString(""));
 }
 
+void APEPlayerCharacter::MulticastUpdateHealthBar_Implementation()
+{
+	UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidget());
+	if (!IsValid(HealthBarWidget))
+	{
+		return;
+	}
+
+	float fPercentage = AttributeSet->GetHealth() / 100;
+	HealthBarWidget->HealthBar->SetPercent(fPercentage);
+}
+
 // Called when the game starts or when spawned
 void APEPlayerCharacter::BeginPlay()
 {
@@ -240,8 +252,8 @@ void APEPlayerCharacter::BeginPlay()
 
 	if (IsValid(HealthBarWidgetClass))
 	{
-		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidgetClass());
-		HealthBarWidget->PlayerCharacterRef = this;
+		// UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidget());
+		// HealthBarWidget->PlayerCharacterRef = this;
 		
 		HealthBarWidgetComponent->SetDrawAtDesiredSize(true);
 		HealthBarWidgetComponent->SetWidgetClass(HealthBarWidgetClass);

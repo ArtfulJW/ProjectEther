@@ -17,14 +17,6 @@ class PROJECTETHER_API UPEHealthBarWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health Bar Specs")
-	APEPlayerCharacter* PlayerCharacterRef;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Bar Specs", meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Bar Specs")
 	UProgressBar* HealthBar;
-
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Health Bar")
-	void ServerUpdateHealthBar(float fPercentage);
 };

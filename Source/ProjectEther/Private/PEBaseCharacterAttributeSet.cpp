@@ -36,7 +36,8 @@ void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(PC->HealthBarWidgetComponent->GetWidget());
 		if (IsValid(HealthBarWidget))
 		{
-			HealthBarWidget->ServerUpdateHealthBar(InHealth/100.0f);
+			// HealthBarWidget->MulticastUpdateHealthBar(InHealth/100.0f);
+			// HealthBarWidget->HealthBar->PercentDelegate.Execute();
 		}
 	}
 

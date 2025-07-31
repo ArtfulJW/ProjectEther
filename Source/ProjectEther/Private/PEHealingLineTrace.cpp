@@ -27,5 +27,6 @@ void UPEHealingLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	if (HitActor && PC->GetController() != HitPlayerController)
 	{
 		HealHealth(HitActor, Hit, 3.0f);
+		HitActor->MulticastUpdateHealthBar();
 	}
 }
