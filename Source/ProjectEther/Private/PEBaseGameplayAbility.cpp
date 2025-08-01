@@ -36,14 +36,16 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
 		float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
 		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
-		HitActor->MulticastUpdateHealthBar();
+
+		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HitActor->HealthBarWidgetComponent->GetWidget());
+		if (!IsValid(HealthBarWidget))
+		{
+			return;
+		}
+		HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
 		
 		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
 	}
-	
-	// APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
-	// APEPlayerCharacter* HitActor = LineTraceAbility(PC, ActorInfo, 5000, FColor::Red);
-	// DamageHealth(PC,Hit, 1.0f);
 }
 
 void UPEBaseGameplayAbility::DamageHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount)

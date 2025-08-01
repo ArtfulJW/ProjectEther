@@ -9,7 +9,7 @@ void UPEDamageLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handle
                                          const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                          const FGameplayEventData* TriggerEventData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s: Server Executed Ability HealingLineTrace"), *ActorInfo->OwnerActor->GetInstigatorController()->GetName())
+	UE_LOG(LogTemp, Warning, TEXT("%s: Server Executed Ability DamageLineTrace"), *ActorInfo->OwnerActor->GetInstigatorController()->GetName())
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
 	UCameraComponent* PlayerCamera = PC->CameraComponent;
 	FHitResult Hit;
@@ -36,6 +36,12 @@ void UPEDamageLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	if (HitActor && PC->GetController() != HitPlayerController)
 	{
 		DamageHealth(HitActor, Hit, fDamage);
-		HitActor->MulticastUpdateHealthBar();
+
+		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HitActor->HealthBarWidgetComponent->GetWidget());
+		if (!IsValid(HealthBarWidget))
+		{
+			return;
+		}
+		HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
 	}
 }

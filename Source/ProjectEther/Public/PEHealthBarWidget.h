@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "PEHealthBarWidget.generated.h"
 
+class UPEBaseCharacterAttributeSet;
 class APEPlayerCharacter;
 /**
  * 
@@ -19,4 +20,7 @@ class PROJECTETHER_API UPEHealthBarWidget : public UUserWidget
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Bar Specs")
 	UProgressBar* HealthBar;
+
+	UFUNCTION(BlueprintCallable, Category = "Health Bar Functions")
+	void UpdateHealthBar(UPEBaseCharacterAttributeSet* AttributeSet);
 };

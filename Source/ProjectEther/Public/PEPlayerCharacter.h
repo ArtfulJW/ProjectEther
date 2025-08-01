@@ -144,8 +144,8 @@ public:
 
 	void IsLookingAtInteractable();
 
-	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Health Bar")
-	void MulticastUpdateHealthBar();
+	UFUNCTION(BlueprintCallable, Category = "Health Bar")
+	void UpdateHealthBar();
 	
 protected:
 	// Called when the game starts or when spawned

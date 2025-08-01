@@ -53,7 +53,7 @@ UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
 void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
+	
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityOneHandle, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityTwoHandle, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, AbilityThreeHandle, COND_OwnerOnly);
@@ -208,7 +208,7 @@ void APEPlayerCharacter::IsLookingAtInteractable()
 	TextBlock->SetText(FText::FromString(""));
 }
 
-void APEPlayerCharacter::MulticastUpdateHealthBar_Implementation()
+void APEPlayerCharacter::UpdateHealthBar()
 {
 	UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidget());
 	if (!IsValid(HealthBarWidget))

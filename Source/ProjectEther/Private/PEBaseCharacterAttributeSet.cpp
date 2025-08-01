@@ -16,6 +16,20 @@ void UPEBaseCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLife
 void UPEBaseCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, Health, OldHealth);
+
+	APEPlayerCharacter* PlayerCharacter = Cast<APEPlayerCharacter>(GetOuter());
+	if (!IsValid(PlayerCharacter))
+	{
+		return;
+	}
+	
+	UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(PlayerCharacter->HealthBarWidgetComponent->GetWidget());
+	if (!IsValid(HealthBarWidget))
+	{
+		return;
+	}
+	
+	HealthBarWidget->UpdateHealthBar(PlayerCharacter->AttributeSet);
 }
 
 void UPEBaseCharacterAttributeSet::OnRep_Speed(const FGameplayAttributeData& OldSpeed)
@@ -33,12 +47,6 @@ void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 	else
 	{
 		Health = InHealth;
-		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(PC->HealthBarWidgetComponent->GetWidget());
-		if (IsValid(HealthBarWidget))
-		{
-			// HealthBarWidget->MulticastUpdateHealthBar(InHealth/100.0f);
-			// HealthBarWidget->HealthBar->PercentDelegate.Execute();
-		}
 	}
 
 	if (Health.GetCurrentValue() <= 0.0f)
