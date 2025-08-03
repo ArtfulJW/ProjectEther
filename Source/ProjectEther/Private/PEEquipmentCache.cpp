@@ -15,9 +15,8 @@ APEEquipmentCache::APEEquipmentCache():
 void APEEquipmentCache::BeginPlay()
 {
 	Super::BeginPlay();
-
-	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-	GameState->ServerAddEquipmentCache(this, Team);
+	
+	ServerSubscribeToGameState();
 }
 
 void APEEquipmentCache::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -51,26 +50,57 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 		UE_LOG(LogTemp, Warning, TEXT("Cannot Spawn Player: Equipment Cache and Requested Player not on the same team"));
 		return;
 	}
-	
-	if (NumRevives > 0)
-	{
-		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
-		// GetWorld()->SpawnActor<APEPlayerCharacter>(GameState->PlayerControllerCharacterArray[Requester]);
-		FVector Vector = GetTransform().GetLocation();
-		Vector.X += 30;
-		APEPlayerCharacter* SpawnedActor = GetWorld()->SpawnActor<APEPlayerCharacter>(PlayerCharacter, Vector,FRotator(0, 0, 0));
-		Requester->Possess(SpawnedActor);
-		UE_LOG(LogTemp, Warning, TEXT("Equipment Cache Spawning Player: %s. Revives left: %i"), *Requester->GetName(), NumRevives);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Equipment Cache: %s has no more Revive Tokens"), *this->GetName());
-		Destroy();
-	}
 
-	NumRevives--;
 	if (NumRevives <= 0)
 	{
+		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+		UE_LOG(LogTemp, Warning, TEXT("Equipment Cache: %s has no more Revive Tokens"), *this->GetName());
+		GameState->ServerRemoveEquipmentCache(this, Team);
 		Destroy();
 	}
+	
+	// if (NumRevives > 0)
+	// {
+	// 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	// 	APEPlayerCharacter* RequesterCharacter = Cast<APEPlayerCharacter>(Requester->GetCharacter());
+	// 	TSubclassOf<APEPlayerCharacter> PlayerClass = RequesterCharacter->GetClass();
+	// 	// GetWorld()->SpawnActor<APEPlayerCharacter>(GameState->PlayerControllerCharacterArray[Requester]);
+	// 	FVector Vector = GetTransform().GetLocation();
+	// 	Vector.X += 30;
+	// 	// APEPlayerCharacter* SpawnedActor = GetWorld()->SpawnActor<APEPlayerCharacter>(PlayerClass, Vector,FRotator(0, 0, 0));
+	// 	Requester->Possess(SpawnedActor);
+	// 	UE_LOG(LogTemp, Warning, TEXT("Equipment Cache Spawning Player: %s. Revives left: %i"), *Requester->GetName(), NumRevives);
+	// }
+
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
+	APEPlayerCharacter* SpawnedPlayerCharacter = nullptr;
+
+	switch (Requester->CharacterClass)
+	{
+	case Base:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		break;
+	case Berserker:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		break;
+	case Mage:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		break;
+	case Priest:
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		break;
+	}
+	Requester->Possess(SpawnedPlayerCharacter);
+	NumRevives--;
+}
+
+void APEEquipmentCache::ServerSubscribeToGameState_Implementation()
+{
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	GameState->ServerAddEquipmentCache(this, Team);
 }

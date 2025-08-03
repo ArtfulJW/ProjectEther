@@ -111,4 +111,6 @@ public:
 
 	UFUNCTION()
 	void SpawnEquipmentCache(ETeam EquipmentCacheTeam);
+
+	TArray<APEEquipmentCache*> GetTeamEquipmentCacheArray(ETeam InTeam);
 };

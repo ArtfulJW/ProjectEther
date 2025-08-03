@@ -2,6 +2,7 @@
 
 #include "PEGameState.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 APEGameState::APEGameState():
@@ -61,13 +62,18 @@ void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
 	}
 	
 	APEEquipmentCache* SpawnedActor = nullptr;
+	FTransform SpawnTransform;
 	switch (EquipmentCacheTeam)
 	{
 	case TeamOne:
-		SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		// SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		SpawnTransform = TeamOneEquipmentSpawner->GetTransform();
+		SpawnedActor = World->SpawnActorDeferred<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform(), this);
 		break;
 	case TeamTwo:
-		SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		// SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
+		SpawnTransform = TeamTwoEquipmentSpawner->GetTransform();
+		SpawnedActor = World->SpawnActorDeferred<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform(), this);
 		break;
 	}
 
@@ -75,6 +81,20 @@ void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
 	{
 		SpawnedActor->Team = EquipmentCacheTeam;
 	}
+
+	 UGameplayStatics::FinishSpawningActor(SpawnedActor,SpawnTransform);
+}
+
+TArray<APEEquipmentCache*> APEGameState::GetTeamEquipmentCacheArray(ETeam InTeam)
+{
+	switch (InTeam)
+	{
+		case TeamOne:
+			return TeamOneEquipmentCache;
+		case TeamTwo:
+			return TeamTwoEquipmentCache;
+	}
+	return {};
 }
 
 void APEGameState::SubscribeEquipmentCacheSpawner_Implementation(APEEquipmentCacheSpawner* EquipmentCacheSpawner, ETeam EquipmentCacheTeam)

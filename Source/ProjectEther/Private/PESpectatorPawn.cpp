@@ -46,18 +46,36 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	switch (Requester->Team)
 	{
 		case TeamOne:
-			EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamOneEquipmentCache[0]);
+			for (APEEquipmentCache* EquipmentCacheArrayItem : GameState->TeamOneEquipmentCache)
+			{
+				if (EquipmentCacheArrayItem->bIsDeployed)
+				{
+					EquipmentCache = EquipmentCacheArrayItem;
+					break;
+				}
+			}
+			// EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamOneEquipmentCache[0]);
 			break;
 		case TeamTwo:
-			EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamTwoEquipmentCache[0]);
+			for (APEEquipmentCache* EquipmentCacheArrayItem : GameState->TeamTwoEquipmentCache)
+			{
+				if (EquipmentCacheArrayItem->bIsDeployed)
+				{
+					EquipmentCache = EquipmentCacheArrayItem;
+					break;
+				}
+			}
+			// EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamTwoEquipmentCache[0]);
 			break;
 	}
-
-	if (IsValid(EquipmentCache) && !EquipmentCache->bIsDeployed)
+	
+	if (IsValid(EquipmentCache) && EquipmentCache->bIsDeployed)
+	{
+		EquipmentCache->SpawnPlayer(Requester);
+	}
+	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Undeployed Team EquipmentCache, spawning at main base"))
 		GameState->ServerSpawnPlayerCharacter(PlayerController, PlayerController->CharacterClass);
 	}
-	
-	EquipmentCache->SpawnPlayer(Requester);
 }
