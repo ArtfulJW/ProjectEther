@@ -29,7 +29,7 @@ public:
 	virtual void Destroyed() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
-	TEnumAsByte<ETeam> Team; 
+	ETeam Team; 
 	
 	UPROPERTY(Replicated, VisibleAnywhere)
 	int NumDepositedEther;

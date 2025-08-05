@@ -60,7 +60,7 @@ public:
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
 
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Class Spec")
-	TEnumAsByte<EClassType> CharacterClass = Base;
+	EClassType CharacterClass = EClassType::Base;
 
 	/**
 	 * TODO: REMOVE LATER AFTER PROTOTYPE
@@ -96,7 +96,7 @@ public:
 	TSubclassOf<APEPlayerCharacter> PEPriestPlayerCharacterClass;
 	
 	UPROPERTY(Replicated, VisibleAnywhere)
-	TEnumAsByte<ETeam> Team;
+	ETeam Team;
 	
 	void MoveEvent(const FInputActionValue& Value);
 

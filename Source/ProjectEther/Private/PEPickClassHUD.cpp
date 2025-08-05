@@ -25,7 +25,7 @@ void UPEPickClassHUD::SetBerserkerClassAndRequestSpawn()
 	}
 	
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
-	PlayerController->ServerSetCharacterClass(PlayerController, Berserker);
+	PlayerController->ServerSetCharacterClass(PlayerController, EClassType::Berserker);
 	PlayerController->RequestTeamAssignment();
 	PlayerController->ClientSetupInputControls();
 	PlayerController->RequestSpawn();
@@ -34,7 +34,7 @@ void UPEPickClassHUD::SetBerserkerClassAndRequestSpawn()
 void UPEPickClassHUD::SetMageClassAndRequestSpawn()
 {
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
-	PlayerController->ServerSetCharacterClass(PlayerController, Mage);
+	PlayerController->ServerSetCharacterClass(PlayerController, EClassType::Mage);
 	PlayerController->RequestTeamAssignment();
 	PlayerController->ClientSetupInputControls();
 	PlayerController->RequestSpawn();
@@ -43,7 +43,7 @@ void UPEPickClassHUD::SetMageClassAndRequestSpawn()
 void UPEPickClassHUD::SetPriestClassAndRequestSpawn()
 {
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
-	PlayerController->ServerSetCharacterClass(PlayerController, Priest);
+	PlayerController->ServerSetCharacterClass(PlayerController, EClassType::Priest);
 	PlayerController->RequestTeamAssignment();
 	PlayerController->ClientSetupInputControls();
 	PlayerController->RequestSpawn();

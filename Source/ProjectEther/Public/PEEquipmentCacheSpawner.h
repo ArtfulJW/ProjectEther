@@ -26,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Equipment Cache Spawner Spec")
-	TEnumAsByte<ETeam> Team;
+	ETeam Team;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Equipment Cache Spawner Spec")
 	UBoxComponent* BoxComponent;

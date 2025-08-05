@@ -12,22 +12,22 @@ fEquipmentCacheSpawnDelay(5.0f)
 
 void APEGameState::AssignTeamToPlayerController_Implementation(APEPlayerController* Requester)
 {
-	Requester->Team = TeamOne;
+	Requester->Team = ETeam::TeamOne;
 }
 
 void APEGameState::AssignTeamToEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache)
 {
-	EquipmentCache->Team = TeamOne;
+	EquipmentCache->Team = ETeam::TeamOne;
 }
 
 void APEGameState::ServerAddEquipmentCache_Implementation(APEEquipmentCache* EquipmentCache, const ETeam EquipmentCacheTeam)
 {
 	switch (EquipmentCacheTeam)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			TeamOneEquipmentCache.Add(EquipmentCache);
 			break;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			TeamTwoEquipmentCache.Add(EquipmentCache);
 			break;
 	}
@@ -65,12 +65,12 @@ void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
 	FTransform SpawnTransform;
 	switch (EquipmentCacheTeam)
 	{
-	case TeamOne:
+	case ETeam::TeamOne:
 		// SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
 		SpawnTransform = TeamOneEquipmentSpawner->GetTransform();
 		SpawnedActor = World->SpawnActorDeferred<APEEquipmentCache>(EquipmentCacheClass, TeamOneEquipmentSpawner->GetTransform(), this);
 		break;
-	case TeamTwo:
+	case ETeam::TeamTwo:
 		// SpawnedActor = World->SpawnActor<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform().GetLocation(), FRotator(0,0,0));
 		SpawnTransform = TeamTwoEquipmentSpawner->GetTransform();
 		SpawnedActor = World->SpawnActorDeferred<APEEquipmentCache>(EquipmentCacheClass, TeamTwoEquipmentSpawner->GetTransform(), this);
@@ -89,9 +89,9 @@ TArray<APEEquipmentCache*> APEGameState::GetTeamEquipmentCacheArray(ETeam InTeam
 {
 	switch (InTeam)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			return TeamOneEquipmentCache;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			return TeamTwoEquipmentCache;
 	}
 	return {};
@@ -101,10 +101,10 @@ void APEGameState::SubscribeEquipmentCacheSpawner_Implementation(APEEquipmentCac
 {
 	switch (EquipmentCacheTeam)
 	{
-	case TeamOne:
+	case ETeam::TeamOne:
 		TeamOneEquipmentSpawner = EquipmentCacheSpawner;
 		break;
-	case TeamTwo:
+	case ETeam::TeamTwo:
 		TeamTwoEquipmentSpawner = EquipmentCacheSpawner;
 		break;
 	}
@@ -124,10 +124,10 @@ void APEGameState::ServerRemoveEquipmentCache_Implementation(APEEquipmentCache* 
 	
 	switch (EquipmentCacheTeam)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			TeamOneEquipmentCache.Remove(EquipmentCache);
 			break;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			TeamTwoEquipmentCache.Remove(EquipmentCache);
 			break;
 	}
@@ -171,10 +171,10 @@ void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController
 	TArray<APEPlayerStart*> CorrectTeam;
 	switch (Requester->Team)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			CorrectTeam = TeamOnePlayerStart;
 			break;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			CorrectTeam = TeamTwoPlayerStart;
 			break;
 		default:
@@ -192,16 +192,16 @@ void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController
 
 	switch (ClassType)
 	{
-		case Base:
+		case EClassType::Base:
 			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
-		case Berserker:
+		case EClassType::Berserker:
 			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
-		case Mage:
+		case EClassType::Mage:
 			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
-		case Priest:
+		case EClassType::Priest:
 			SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, SelectedPlayerStart->GetTransform().GetLocation(), SelectedPlayerStart->GetTransform().Rotator());
 			break;
 	}
@@ -223,10 +223,10 @@ void APEGameState::SubscribePlayerStart_Implementation(APEPlayerStart* PlayerSta
 	
 	switch (InTeam)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			TeamOnePlayerStart.Add(PlayerStart);
 			return;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			TeamTwoPlayerStart.Add(PlayerStart);
 			return;
 	}
@@ -273,11 +273,11 @@ void APEGameState::ServerAssignPlayerToTeam_Implementation(APEPlayerController* 
 		
 		if (x % 2 == 0)
 		{
-			CachedPC->Team = TeamOne;
+			CachedPC->Team = ETeam::TeamOne;
 		}
 		else
 		{
-			CachedPC->Team = TeamTwo;
+			CachedPC->Team = ETeam::TeamTwo;
 		}
 		
 		x++;

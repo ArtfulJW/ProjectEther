@@ -38,7 +38,7 @@ public:
 	TSubclassOf<APEPlayerCharacter> PlayerCharacter;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
-	TEnumAsByte<ETeam> Team;
+	ETeam Team;
 
 	UFUNCTION(Server, Reliable)
 	void ServerSubscribeToGameState();

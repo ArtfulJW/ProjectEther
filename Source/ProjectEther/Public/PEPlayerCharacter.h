@@ -15,7 +15,7 @@
 #include "PEPlayerCharacter.generated.h"
 
 UENUM(BlueprintType)
-enum class EDamageDirection
+enum class EDamageDirection : uint8
 {
 	Front,
 	Side,
@@ -29,7 +29,7 @@ inline FString EDamageDirection_ToString(EDamageDirection e)
 		case EDamageDirection::Front: return "Front";
 		case EDamageDirection::Side: return "Side";
 		case EDamageDirection::Back: return "Back";
-		default: throw std::invalid_argument("Unimplemented DamageDirection");
+		default: return "Unimplemented DamageDirection";
 	}
 }
 

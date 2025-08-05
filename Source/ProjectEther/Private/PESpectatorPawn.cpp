@@ -45,7 +45,7 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 	APEEquipmentCache* EquipmentCache = nullptr;
 	switch (Requester->Team)
 	{
-		case TeamOne:
+		case ETeam::TeamOne:
 			for (APEEquipmentCache* EquipmentCacheArrayItem : GameState->TeamOneEquipmentCache)
 			{
 				if (EquipmentCacheArrayItem->bIsDeployed)
@@ -56,7 +56,7 @@ void APESpectatorPawn::ServerRequestRevive_Implementation(APEPlayerController* R
 			}
 			// EquipmentCache = Cast<APEEquipmentCache>(GameState->TeamOneEquipmentCache[0]);
 			break;
-		case TeamTwo:
+		case ETeam::TeamTwo:
 			for (APEEquipmentCache* EquipmentCacheArrayItem : GameState->TeamTwoEquipmentCache)
 			{
 				if (EquipmentCacheArrayItem->bIsDeployed)

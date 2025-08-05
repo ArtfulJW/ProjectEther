@@ -37,7 +37,9 @@ void UPEMainMenuHUD::TravelToMainGame()
 
 	// World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MinimalMap.MinimalMap'"), true);
 
-	ServerRequestTravel();
+	PlayerController->ClientTravel("127.0.0.1", TRAVEL_Absolute);
+
+	// ServerRequestTravel();
 	
 	UE_LOG(LogTemp, Display, TEXT("Traveling to Main Game"));
 }

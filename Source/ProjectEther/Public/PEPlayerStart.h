@@ -19,5 +19,5 @@ public:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Start Spec")
-	TEnumAsByte<ETeam> Team;
+	ETeam Team;
 };

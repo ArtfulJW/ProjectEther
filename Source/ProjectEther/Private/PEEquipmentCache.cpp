@@ -82,16 +82,16 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 
 	switch (Requester->CharacterClass)
 	{
-	case Base:
+	case EClassType::Base:
 		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
 		break;
-	case Berserker:
+	case EClassType::Berserker:
 		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
 		break;
-	case Mage:
+	case EClassType::Mage:
 		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
 		break;
-	case Priest:
+	case EClassType::Priest:
 		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
 		break;
 	}

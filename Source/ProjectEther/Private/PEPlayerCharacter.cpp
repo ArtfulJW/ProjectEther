@@ -8,7 +8,6 @@
 #include "PEEquipmentCache.h"
 #include "PEEther.h"
 #include "PEGameState.h"
-#include "SNegativeActionButton.h"
 #include "Components/TextBlock.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GameFramework/GameMode.h"

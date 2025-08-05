@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 
-UENUM(Blueprintable)
-enum ETeam
+UENUM(BlueprintType)
+enum class ETeam : uint8
 {
 	TeamOne,
 	TeamTwo
@@ -16,12 +16,12 @@ inline FString ETeam_ToString(ETeam e)
 	{
 	case ETeam::TeamOne: return "Team One";
 	case ETeam::TeamTwo: return "Team Two";
-	default: throw std::invalid_argument("Unimplemented DamageDirection");
+	default: return "Unimplemented DamageDirection";
 	}
 }
 
-UENUM(Blueprintable)
-enum EClassType
+UENUM(BlueprintType)
+enum class EClassType : uint8
 {
 	Base,
 	Berserker,
