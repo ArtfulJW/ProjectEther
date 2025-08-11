@@ -234,6 +234,12 @@ void APEGameState::SubscribePlayerStart_Implementation(APEPlayerStart* PlayerSta
 
 void APEGameState::ServerSubscribeEtherSpawnRegion_Implementation(APEEtherSpawnRegion* SpawnRegion)
 {
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
 	if (!IsValid(SpawnRegion))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid EtherSpawnRegion: %s"), *SpawnRegion->GetName());

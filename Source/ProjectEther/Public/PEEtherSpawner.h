@@ -29,4 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Spawner Spec")
 	UTextRenderComponent* TextRenderComponent;
+
+	UFUNCTION()
+	void EtherSpawnerSetup();
 };

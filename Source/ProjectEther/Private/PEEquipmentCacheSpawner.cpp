@@ -37,7 +37,7 @@ void APEEquipmentCacheSpawner::BeginPlay()
 	}
 
 	GameState->SubscribeEquipmentCacheSpawner(this, Team);
-	TextRenderComponent->Text = FText::FromString(FText::FromString(*ETeam_ToString(Team)).ToString() + TEXT("Equipment Cache Spawner"));
+	// TextRenderComponent->Text = FText::FromString(FText::FromString(*ETeam_ToString(Team)).ToString() + TEXT("Equipment Cache Spawner"));
 }
 
 // Called every frame

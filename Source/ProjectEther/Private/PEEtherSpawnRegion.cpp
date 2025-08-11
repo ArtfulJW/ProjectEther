@@ -11,8 +11,8 @@ APEEtherSpawnRegion::APEEtherSpawnRegion()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
-	SpawnRegion = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnRegion"));
-	SpawnRegion->SetupAttachment(RootComponent);
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnRegion"));
+	BoxComponent->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +28,7 @@ void APEEtherSpawnRegion::BeginPlay()
 	}
 	
 	GameState->ServerSubscribeEtherSpawnRegion(this);
+	OnInstantiateDelegate.Broadcast();
 }
 
 // Called every frame

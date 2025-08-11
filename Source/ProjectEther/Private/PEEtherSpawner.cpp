@@ -26,6 +26,18 @@ void APEEtherSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
+	EtherSpawnerSetup();
+}
+
+// Called every frame
+void APEEtherSpawner::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void APEEtherSpawner::EtherSpawnerSetup()
+{
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (!IsValid(GameState))
 	{
@@ -33,8 +45,16 @@ void APEEtherSpawner::BeginPlay()
 		return;
 	}
 
-	FVector PointRelativeToSpawnRegion = UKismetMathLibrary::InverseTransformLocation(GameState->EtherSpawnRegion->GetTransform(), GetActorLocation());
-	float fPointDistanceFromBoxEdge = PEMathLibrary::SignedDistanceFieldBox(PointRelativeToSpawnRegion, GameState->EtherSpawnRegion->SpawnRegion->GetUnscaledBoxExtent());
+	APEEtherSpawnRegion* EtherSpawnRegion = GameState->EtherSpawnRegion;
+	if (!IsValid(EtherSpawnRegion))
+	{
+		// Subscribe to delegate
+		EtherSpawnRegion->OnInstantiateDelegate.AddUniqueDynamic(this, &APEEtherSpawner::EtherSpawnerSetup);
+		return;
+	}
+	
+	FVector PointRelativeToSpawnRegion = UKismetMathLibrary::InverseTransformLocation(EtherSpawnRegion->GetTransform(), GetActorLocation());
+	float fPointDistanceFromBoxEdge = PEMathLibrary::SignedDistanceFieldBox(PointRelativeToSpawnRegion, EtherSpawnRegion->BoxComponent->GetUnscaledBoxExtent());
 
 	// DrawDebugSphere(GetWorld(), PointRelativeToSpawnRegion, 3, 15, FColor::Red, true);
 	// DrawDebugSphere(GetWorld(), GameState->EtherSpawnRegion->GetActorScale(), 3, 15, FColor::Purple, true);
@@ -53,12 +73,5 @@ void APEEtherSpawner::BeginPlay()
 		Destroy();
 	}
 
-	TextRenderComponent->Text = FText::FromString(TEXT("Ether Spawner"));
-}
-
-// Called every frame
-void APEEtherSpawner::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+	// TextRenderComponent->Text = FText::FromString(TEXT("Ether Spawner"));
 }

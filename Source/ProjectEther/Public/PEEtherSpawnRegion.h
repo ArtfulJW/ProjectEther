@@ -8,6 +8,8 @@
 
 class UBoxComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInstantiateSignature);
+
 UCLASS()
 class PROJECTETHER_API APEEtherSpawnRegion : public AActor
 {
@@ -25,5 +27,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Box Component")
-	UBoxComponent* SpawnRegion;
+	UBoxComponent* BoxComponent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInstantiateSignature OnInstantiateDelegate;
 };
