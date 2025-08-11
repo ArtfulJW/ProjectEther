@@ -25,8 +25,6 @@ APEEtherSpawner::APEEtherSpawner()
 void APEEtherSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-
-	EtherSpawnerSetup();
 }
 
 // Called every frame
@@ -48,8 +46,6 @@ void APEEtherSpawner::EtherSpawnerSetup()
 	APEEtherSpawnRegion* EtherSpawnRegion = GameState->EtherSpawnRegion;
 	if (!IsValid(EtherSpawnRegion))
 	{
-		// Subscribe to delegate
-		EtherSpawnRegion->OnInstantiateDelegate.AddUniqueDynamic(this, &APEEtherSpawner::EtherSpawnerSetup);
 		return;
 	}
 	

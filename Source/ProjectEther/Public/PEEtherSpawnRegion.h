@@ -8,8 +8,6 @@
 
 class UBoxComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInstantiateSignature);
-
 UCLASS()
 class PROJECTETHER_API APEEtherSpawnRegion : public AActor
 {
@@ -28,7 +26,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Box Component")
 	UBoxComponent* BoxComponent;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnInstantiateSignature OnInstantiateDelegate;
 };

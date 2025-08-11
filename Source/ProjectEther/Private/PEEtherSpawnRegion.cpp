@@ -19,6 +19,12 @@ APEEtherSpawnRegion::APEEtherSpawnRegion()
 void APEEtherSpawnRegion::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
 	
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	if (!IsValid(GameState))
@@ -28,7 +34,18 @@ void APEEtherSpawnRegion::BeginPlay()
 	}
 	
 	GameState->ServerSubscribeEtherSpawnRegion(this);
-	OnInstantiateDelegate.Broadcast();
+	
+	TArray<AActor*> EtherSpawners;
+	UGameplayStatics::GetAllActorsOfClass(World, APEEtherSpawner::StaticClass(), EtherSpawners);
+	for (AActor* Actor : EtherSpawners)
+	{
+		APEEtherSpawner* EtherSpawner = Cast<APEEtherSpawner>(Actor);
+		if (!IsValid(EtherSpawner))
+		{
+			break;
+		}
+		EtherSpawner->EtherSpawnerSetup();
+	}
 }
 
 // Called every frame
