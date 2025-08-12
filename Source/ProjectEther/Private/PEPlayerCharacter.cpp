@@ -17,6 +17,7 @@
 #include "Net/UnrealNetwork.h"
 
 APEPlayerCharacter::APEPlayerCharacter():
+	fInteractDistance(500.0f),
 	bIsLookingAtInteractableActor(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -148,23 +149,24 @@ void APEPlayerCharacter::BeforeDestroy()
 void APEPlayerCharacter::IsLookingAtInteractable()
 {
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000, ECC_Visibility);
+	GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * fInteractDistance, ECC_Visibility);
 	AActor* Actor = Hit.GetActor();
 
-	// DrawDebugLine(GetWorld(), CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000, FColor::Black, false, 5.0f);
+	// DrawDebugLine(GetWorld(), CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * fInteractDistance, FColor::Black, false, 5.0f);
 	
 	if (!IsValid(PlayerHUD))
-	{
-		return;
-	}
-
-	if (!IsValid(Actor))
 	{
 		return;
 	}
 	
 	UTextBlock* TextBlock =  Cast<UTextBlock>(PlayerHUD->GetWidgetFromName(FName("InteractTextBlock")));
 	bIsLookingAtInteractableActor = UKismetSystemLibrary::DoesImplementInterface(Actor, UInteractableInterface::StaticClass());
+
+	if (!IsValid(Actor))
+	{
+		TextBlock->SetText(FText::FromString(""));
+		return;
+	}
 
 	APEEquipmentCache* EquipmentCache = Cast<APEEquipmentCache>(Actor);
 	APEPlayerController* PC = Cast<APEPlayerController>(GetController());

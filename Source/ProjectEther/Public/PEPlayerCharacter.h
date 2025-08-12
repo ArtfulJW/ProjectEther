@@ -65,6 +65,9 @@ public:
 	USceneComponent* CarrySceneComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	float fInteractDistance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	UPEBaseCharacterAttributeSet* AttributeSet;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
