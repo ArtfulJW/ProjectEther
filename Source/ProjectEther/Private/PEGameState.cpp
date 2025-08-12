@@ -181,7 +181,7 @@ void APEGameState::ServerSpawnPlayerCharacter_Implementation(APEPlayerController
 			return;
 	}
 	
-	int SpawningIndex = FMath::RandRange(0, CorrectTeam.Max() - 1);
+	int SpawningIndex = FMath::RandRange(0, CorrectTeam.Num() - 1);
 	APEPlayerStart* SelectedPlayerStart = CorrectTeam[SpawningIndex];
 	if (!IsValid(SelectedPlayerStart))
 	{
