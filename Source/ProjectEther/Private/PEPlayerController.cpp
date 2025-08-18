@@ -75,10 +75,11 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-	if (IsValid(PC))
+	if (IsValid(PC) && PC->AttributeSet->GetHealth() > 0)
 	{
-		FVector Direction = Value.Get<FVector>();	
-		ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed());
+		FVector Direction = Value.Get<FVector>();
+		float WorldDeltaSeconds = World->GetDeltaSeconds();
+		ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed() * WorldDeltaSeconds);
 	}
 }
 
