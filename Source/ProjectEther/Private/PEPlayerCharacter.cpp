@@ -142,6 +142,7 @@ void APEPlayerCharacter::BeforeDestroy()
 	// GameState->PlayerControllerCharacterArray.Remove(PlayerController);
 	PlayerCharacter->ClientRemovePlayerHUD();
 	SpectatorPawn->SetActorLocation(GetActorLocation());
+	PlayerController->ServerDropInteractableActor(PlayerController);
 	PlayerController->Possess(SpectatorPawn);
 	EtherCompassActor->Destroy();
 }
