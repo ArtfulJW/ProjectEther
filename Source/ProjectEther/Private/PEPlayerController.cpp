@@ -75,16 +75,24 @@ void APEPlayerController::MoveEvent(const FInputActionValue& Value)
 	}
 	
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-	if (IsValid(PC))
+	if (IsValid(PC) && PC->AttributeSet->GetHealth() > 0)
 	{
-		FVector Direction = Value.Get<FVector>();	
-		ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed());
+		FVector Direction = Value.Get<FVector>();
+		float WorldDeltaSeconds = World->GetDeltaSeconds();
+		ServerMovePlayer(this, Direction * PC->AbilitySystemComponent->GetSet<UPEBaseCharacterAttributeSet>()->GetSpeed() * WorldDeltaSeconds);
 	}
 }
 
 void APEPlayerController::ServerMovePlayer_Implementation(APEPlayerController* Requester, FVector InVector)
 {
-	Cast<APEPlayerCharacter>(Requester->GetPawn())->AddActorLocalTransform(FTransform(InVector));
+	APEPlayerCharacter* PlayerCharacter = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	if (!IsValid(PlayerCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerMovePlayer: Cannot move an invalid PlayerCharacter"));
+		return;
+	}
+	
+	PlayerCharacter->AddActorLocalTransform(FTransform(InVector));
 }
 
 void APEPlayerController::LookEvent(const FInputActionValue& Value)
@@ -124,6 +132,12 @@ void APEPlayerController::UseAbilityEvent(const FInputActionValue& Value)
 	}
 
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+		return;
+	}
+	
 	if (PlayerInput->IsPressed(EKeys::Two))
 	{
 		ServerUseGameplayAbilityEvent(this, PC->AbilityOneHandle);
@@ -144,6 +158,11 @@ void APEPlayerController::ServerUseGameplayAbilityEvent_Implementation(APEPlayer
 	FGameplayAbilitySpecHandle AbilityHandle)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(Requester->GetPawn());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+	
 	PC->AbilitySystemComponent->TryActivateAbility(AbilityHandle);
 }
 
@@ -155,6 +174,12 @@ void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
 	}
 
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerCharacter"));
+		return;
+	}
+	
 	if (PlayerInput->IsPressed(EKeys::LeftMouseButton))
 	{
 		ServerUseGameplayAbilityEvent(this, PC->WeaponAbilityOneHandle);
@@ -371,6 +396,11 @@ void APEPlayerController::ServerDeployInteractable_Implementation(APEInteractabl
 void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerController* Requester)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (!IsValid(PC->CarriedInteractableActor))
+	{
+		return;
+	}
+	
 	if (PC->CarriedInteractableActor)
 	{
 		PC->CarriedInteractableActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
