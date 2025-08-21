@@ -121,6 +121,12 @@ void APEPlayerController::LookEvent(const FInputActionValue& Value)
 void APEPlayerController::ServerLookEvent_Implementation(APEPlayerController* Requester, FRotator InRotator)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetPawn());
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerLookEvent: Invalid PlayerCharacter"));
+		return;
+	}
+	
 	PC->CameraComponent->SetRelativeRotation(InRotator);
 }
 
@@ -204,6 +210,11 @@ void APEPlayerController::ServerInteractEvent_Implementation(APEPlayerController
 	}
 	
 	APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(InActor);
+	if (!IsValid(InteractableActor))
+	{
+		return;
+	}
+	
 	if (!InteractableActor->IsA(APEInteractableBase::StaticClass()))
 	{
 		return;
@@ -255,7 +266,7 @@ void APEPlayerController::InteractEvent()
 	if (Actor->IsA(APEEther::StaticClass()))
 	{
 		APEEther* Ether = Cast<APEEther>(Actor);
-		if (!IsValid(Ether) || Ether->bIsDeposited)
+		if (!IsValid(Ether) || Ether->bIsDeposited || IsValid(Ether->Carrier))
 		{
 			return;
 		}
@@ -410,6 +421,10 @@ void APEPlayerController::ServerDropInteractableActor_Implementation(APEPlayerCo
 	if (PC->CarriedInteractableActor->IsA(APEInteractableBase::StaticClass()))
 	{
 		APEInteractableBase* InteractableActor = Cast<APEInteractableBase>(PC->CarriedInteractableActor);
+		if (!IsValid(InteractableActor))
+		{
+			return;
+		}
 		InteractableActor->MulticastSetSimulatePhysics(true);
 		InteractableActor->RemoveCarryEffect();
 		InteractableActor->Carrier = nullptr;

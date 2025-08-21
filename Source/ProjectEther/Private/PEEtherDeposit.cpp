@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PEEtherDeposit.h"
+
 #include "PEEther.h"
 #include "PEGameMode.h"
 #include "PEGameState.h"
@@ -89,13 +90,28 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	}
 	
 	APEEther* Ether = Cast<APEEther>(Other);
+	if (!IsValid(Ether))
+	{
+		return;
+	}
+	
 	if (!IsValid(Ether->Carrier))
 	{
 		return;
 	}
 	
 	APEPlayerCharacter* PlayerCharacter = Ether->Carrier;
+	if (!IsValid(PlayerCharacter))
+	{
+		return;
+	}
+	
 	APEPlayerController* PlayerController = Cast<APEPlayerController>(PlayerCharacter->GetController());
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+	
 	if (Team != PlayerController->Team)
 	{
 		return;
