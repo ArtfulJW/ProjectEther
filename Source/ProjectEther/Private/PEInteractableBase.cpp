@@ -64,6 +64,11 @@ void APEInteractableBase::Interact()
 {
 	IInteractableInterface::Interact();
 
+	if (!IsValid(Carrier))
+	{
+		return;
+	}
+	
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
