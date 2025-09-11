@@ -10,6 +10,7 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEEtherCompass.h"
 #include "PEHealthBarWidget.h"
+#include "PEBasePassiveAbilityComponent.h"
 #include "PEPlayerHUD.h"
 #include "Components/WidgetComponent.h"
 #include "PEPlayerCharacter.generated.h"
@@ -77,7 +78,10 @@ public:
 	UDataTable* DataTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> PassiveAbility;
+	TSubclassOf<UPEBasePassiveAbilityComponent> PassiveAbilityComponent;
+	
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	// TSubclassOf<UGameplayAbility> PassiveAbility;
 
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle PassiveAbilityHandle;

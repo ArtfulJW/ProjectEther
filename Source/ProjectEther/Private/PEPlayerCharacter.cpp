@@ -274,7 +274,7 @@ void APEPlayerCharacter::BeginPlay()
 	
 	if (GetNetMode() < NM_Client)
 	{
-		PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbility);
+		PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbilityComponent.GetDefaultObject()->PassiveAbility);
 		WeaponAbilityOneHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityOne);
 		WeaponAbilityTwoHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityTwo);
 		AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOne);
