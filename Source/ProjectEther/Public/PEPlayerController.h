@@ -35,6 +35,8 @@ protected:
 	UInputMappingContext* InputMapping;
 
 public:
+	APEPlayerController();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* MoveAction;
 	
@@ -97,6 +99,9 @@ public:
 	
 	UPROPERTY(Replicated, VisibleAnywhere)
 	ETeam Team;
+
+	UPROPERTY(Replicated)
+	bool bCanBasicAttack;
 	
 	void MoveEvent(const FInputActionValue& Value);
 
@@ -154,6 +159,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void RequestTeamAssignment();
+
+	void ReplenishBasicAttack();
 	
 protected:
 	virtual void OnPossess(APawn* APawn) override;

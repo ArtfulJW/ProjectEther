@@ -33,6 +33,6 @@ void UPEHealingLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		{
 			return;
 		}
-		HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
+		HealthBarWidget->ServerUpdateHealthBar(HitActor->AttributeSet);
 	}
 }

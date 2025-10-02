@@ -16,6 +16,9 @@ class PROJECTETHER_API UPEBaseCharacterAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_MaxHealth, Category = "Character Specs")
+	FGameplayAttributeData MaxHealth;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Health, Category = "Character Specs")
 	FGameplayAttributeData Health;
@@ -23,15 +26,59 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Speed, Category = "Character Specs")
 	FGameplayAttributeData Speed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_AttackSpeed, Category="Character Specs")
+	FGameplayAttributeData AttackSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_AbilityCostMultiplier, Category="Character Specs")
+	FGameplayAttributeData AbilityCostMultiplier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CooldownMultiplier, Category="Character Specs")
+	FGameplayAttributeData CooldownMultiplier;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_DamageDirectionFront, Category="Character Specs")
+	FGameplayAttributeData DamageDirectionFront;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_DamageDirectionSide, Category="Character Specs")
+	FGameplayAttributeData DamageDirectionSide;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_DamageDirectionBack, Category="Character Specs")
+	FGameplayAttributeData DamageDirectionBack;
+	
 public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
+	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth);
+	
+	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth);
 
 	UFUNCTION()
 	void OnRep_Speed(const FGameplayAttributeData& OldSpeed);
+
+	UFUNCTION()
+	void OnRep_AttackSpeed(const FGameplayAttributeData& OldAttackSpeed);
+
+	UFUNCTION()
+	void OnRep_AbilityCostMultiplier(const FGameplayAttributeData& OldAbilityCostMultiplier);
+
+	UFUNCTION()
+	void OnRep_CooldownMultiplier(const FGameplayAttributeData& OldCooldownMultiplier);
+	
+	UFUNCTION()
+	void OnRep_DamageDirectionFront(const FGameplayAttributeData& OldDamageDirectionFront);
+
+	UFUNCTION()
+	void OnRep_DamageDirectionSide(const FGameplayAttributeData& OldDamageDirectionSide);
+
+	UFUNCTION()
+	void OnRep_DamageDirectionBack(const FGameplayAttributeData& OldDamageDirectionBack);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, MaxHealth);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(MaxHealth);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(MaxHealth);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(MaxHealth);
 	
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, Health);
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(Health);
@@ -44,4 +91,34 @@ public:
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(Speed);
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(Speed);
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(Speed);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, AttackSpeed);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(AttackSpeed);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(AttackSpeed);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(AttackSpeed);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, AbilityCostMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(AbilityCostMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(AbilityCostMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(AbilityCostMultiplier);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, CooldownMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(CooldownMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(CooldownMultiplier);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(CooldownMultiplier);
+	
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, DamageDirectionFront);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(DamageDirectionFront);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(DamageDirectionFront);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(DamageDirectionFront);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, DamageDirectionSide);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(DamageDirectionSide);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(DamageDirectionSide);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(DamageDirectionSide);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, DamageDirectionBack);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(DamageDirectionBack);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(DamageDirectionBack);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(DamageDirectionBack);
 };

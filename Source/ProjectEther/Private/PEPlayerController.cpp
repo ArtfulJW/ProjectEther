@@ -64,6 +64,22 @@ void APEPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 
 	DOREPLIFETIME(APEPlayerController, Team);
 	DOREPLIFETIME(APEPlayerController, CharacterClass);
+	DOREPLIFETIME(APEPlayerController, bCanBasicAttack);
+}
+
+APEPlayerController::APEPlayerController():
+InputMapping(nullptr),
+MoveAction(nullptr),
+LookAction(nullptr),
+AbilityAction(nullptr),
+WeaponAction(nullptr),
+InteractAction(nullptr),
+DeployInteractableAction(nullptr),
+CheckCompassAction(nullptr),
+PEPickClassHUD(nullptr),
+Team(),
+bCanBasicAttack(true)
+{
 }
 
 void APEPlayerController::MoveEvent(const FInputActionValue& Value)
@@ -170,6 +186,10 @@ void APEPlayerController::ServerUseGameplayAbilityEvent_Implementation(APEPlayer
 	}
 	
 	PC->AbilitySystemComponent->TryActivateAbility(AbilityHandle);
+	bCanBasicAttack = false;
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APEPlayerController::ReplenishBasicAttack, 1/PC->AttributeSet->GetAttackSpeed(), false);
 }
 
 void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
@@ -186,11 +206,11 @@ void APEPlayerController::UseWeaponEvent(const FInputActionValue& Value)
 		return;
 	}
 	
-	if (PlayerInput->IsPressed(EKeys::LeftMouseButton))
+	if (PlayerInput->IsPressed(EKeys::LeftMouseButton) && bCanBasicAttack)
 	{
 		ServerUseGameplayAbilityEvent(this, PC->WeaponAbilityOneHandle);
 	}
-	if (PlayerInput->IsPressed(EKeys::RightMouseButton))
+	if (PlayerInput->IsPressed(EKeys::RightMouseButton) && bCanBasicAttack)
 	{
 		ServerUseGameplayAbilityEvent(this, PC->WeaponAbilityTwoHandle);
 	}
@@ -364,6 +384,11 @@ void APEPlayerController::RequestTeamAssignment_Implementation()
 {
 	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
 	GameState->ServerAssignPlayerToTeam(this);
+}
+
+void APEPlayerController::ReplenishBasicAttack()
+{
+	bCanBasicAttack = true;
 }
 
 void APEPlayerController::OnPossess(APawn* APawn)

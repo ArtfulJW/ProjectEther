@@ -4,7 +4,7 @@
 
 #include "PEBaseCharacterAttributeSet.h"
 
-void UPEHealthBarWidget::UpdateHealthBar(UPEBaseCharacterAttributeSet* AttributeSet)
+void UPEHealthBarWidget::ServerUpdateHealthBar_Implementation(UPEBaseCharacterAttributeSet* AttributeSet)
 {
 	float fPercentage = AttributeSet->GetHealth() / 100;
 	HealthBar->SetPercent(fPercentage);

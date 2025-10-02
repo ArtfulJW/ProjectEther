@@ -36,12 +36,12 @@ void UPEDamageLineTrace::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	if (HitActor && PC->GetController() != HitPlayerController)
 	{
 		DamageHealth(HitActor, Hit, fDamage);
-
+		PC->OnEnemyHitDelegate.ExecuteIfBound(HitActor);
 		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HitActor->HealthBarWidgetComponent->GetWidget());
 		if (!IsValid(HealthBarWidget))
 		{
 			return;
 		}
-		HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
+		HealthBarWidget->ServerUpdateHealthBar(HitActor->AttributeSet);
 	}
 }

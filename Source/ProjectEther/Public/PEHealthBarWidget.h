@@ -21,6 +21,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Bar Specs")
 	UProgressBar* HealthBar;
 
-	UFUNCTION(BlueprintCallable, Category = "Health Bar Functions")
-	void UpdateHealthBar(UPEBaseCharacterAttributeSet* AttributeSet);
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Health Bar Functions")
+	void ServerUpdateHealthBar(UPEBaseCharacterAttributeSet* AttributeSet);
 };

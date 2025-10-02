@@ -2,7 +2,10 @@
 <project version="4">
   <component name="UserContentModel">
     <attachedFolders />
-    <explicitIncludes />
+    <explicitIncludes>
+      <Path>Source/ProjectEther/Private/PEBirthrightApostlePassive.cpp</Path>
+      <Path>Source/ProjectEther/Public/PEBirthrightApostlePassive.h</Path>
+    </explicitIncludes>
     <explicitExcludes />
   </component>
 </project>

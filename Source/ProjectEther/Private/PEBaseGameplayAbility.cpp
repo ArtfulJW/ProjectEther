@@ -12,61 +12,61 @@ void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
                                              const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                              const FGameplayEventData* TriggerEventData)
 {
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	
-	UE_LOG(LogTemp, Warning, TEXT("%s: Server Executed Ability (1)"), *ActorInfo->OwnerActor->GetInstigatorController()->GetName())
-	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
-	UCameraComponent* PlayerCamera = PC->CameraComponent;
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, ECC_Pawn);
-	DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, FColor::Black);
-	
-	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
-	if (!HitActor)
-	{
-		return;
-	}
-	APEPlayerController* HitPlayerController = Cast<APEPlayerController>(HitActor->GetController());
-	
-	DrawDebugSphere(GetWorld(), Hit.Location, 15, 15,FColor::Black);
-		
-	if (HitActor && PC->GetController() != HitPlayerController)
-	{
-		UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
-		EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
-		float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
-		AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
-
-		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HitActor->HealthBarWidgetComponent->GetWidget());
-		if (!IsValid(HealthBarWidget))
-		{
-			return;
-		}
-		HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
-		
-		UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
-	}
+	// Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	//
+	// UE_LOG(LogTemp, Warning, TEXT("%s: Server Executed Ability (1)"), *ActorInfo->OwnerActor->GetInstigatorController()->GetName())
+	// APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActorFromActorInfo());
+	// UCameraComponent* PlayerCamera = PC->CameraComponent;
+	// FHitResult Hit;
+	// GetWorld()->LineTraceSingleByChannel(Hit, PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, ECC_Pawn);
+	// DrawDebugLine(GetWorld(), PlayerCamera->GetComponentLocation(), PlayerCamera->GetComponentLocation() + PlayerCamera->GetForwardVector() * 2000, FColor::Black);
+	//
+	// APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	// if (!HitActor)
+	// {
+	// 	return;
+	// }
+	// APEPlayerController* HitPlayerController = Cast<APEPlayerController>(HitActor->GetController());
+	//
+	// DrawDebugSphere(GetWorld(), Hit.Location, 15, 15,FColor::Black);
+	// 	
+	// if (HitActor && PC->GetController() != HitPlayerController)
+	// {
+	// 	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
+	// 	EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
+	// 	float DamageMultipler = DetermineDamageMultiplier(DamageDirection, TODO);
+	// 	AttributeSet->SetHealth(AttributeSet->GetHealth() - 1 * DamageMultipler);
+	//
+	// 	UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HitActor->HealthBarWidgetComponent->GetWidget());
+	// 	if (!IsValid(HealthBarWidget))
+	// 	{
+	// 		return;
+	// 	}
+	// 	HealthBarWidget->UpdateHealthBar(HitActor->AttributeSet);
+	// 	
+	// 	UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
+	// }
 }
 
-void UPEBaseGameplayAbility::DamageHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount)
+void UPEBaseGameplayAbility::DamageHealth(APEPlayerCharacter* HitActor, FHitResult Hit, float fAmount)
 {
-	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	// APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
 	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
 	
-	EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
-	float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
+	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit);
+	float DamageMultipler = DetermineDamageMultiplier(DamageDirection, HitActor);
 	AttributeSet->SetHealth(AttributeSet->GetHealth() - fAmount * DamageMultipler);
 	
 	UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
 }
 
-void UPEBaseGameplayAbility::HealHealth(APEPlayerCharacter* PC, FHitResult Hit, float fAmount)
+void UPEBaseGameplayAbility::HealHealth(APEPlayerCharacter* HitActor, FHitResult Hit, float fAmount)
 {
-	APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
+	// APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
 	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
 	
-	EDamageDirection DamageDirection = PC->DetermineDamageDirection(Hit);
-	float DamageMultipler = DetermineDamageMultiplier(DamageDirection);
+	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit);
+	float DamageMultipler = DetermineDamageMultiplier(DamageDirection, HitActor);
 	AttributeSet->SetHealth(AttributeSet->GetHealth() + fAmount * DamageMultipler);
 	
 	UE_LOG(LogTemp, Warning, TEXT("%s; Health now %f, damaged from: %s, with multiplier: %f"), *HitActor->GetName(), AttributeSet->GetHealth(), *EDamageDirection_ToString(DamageDirection), DamageMultipler);
@@ -96,17 +96,23 @@ void UPEBaseGameplayAbility::HealHealth(APEPlayerCharacter* PC, FHitResult Hit, 
 	return nullptr;
 }
 
-float UPEBaseGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection) const
+float UPEBaseGameplayAbility::DetermineDamageMultiplier(const EDamageDirection DamageDirection, APEPlayerCharacter* PC) const
 {
+	if (!IsValid(PC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DetermineDamageMultiplier, Invalid PC."));
+		return 0.0f;
+	}
 	switch (DamageDirection)
 	{
 		case EDamageDirection::Front:
-			return 1.0f;
+			return PC->AttributeSet->GetDamageDirectionFront();
 		case EDamageDirection::Side:
-			return 1.5f;
+			return PC->AttributeSet->GetDamageDirectionSide();
 		case EDamageDirection::Back:
-			return 2.0f;
+			return PC->AttributeSet->GetDamageDirectionBack();
 		default:
+			UE_LOG(LogTemp, Warning, TEXT("Something went wrong, was not able to determine a damage direction."));
 			return 0.0f;
 	}
 }

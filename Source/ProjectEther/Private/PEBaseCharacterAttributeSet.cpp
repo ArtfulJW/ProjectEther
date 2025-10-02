@@ -9,8 +9,20 @@ void UPEBaseCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, MaxHealth);
 	DOREPLIFETIME(UPEBaseCharacterAttributeSet, Health);
 	DOREPLIFETIME(UPEBaseCharacterAttributeSet, Speed);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, AttackSpeed);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, AbilityCostMultiplier);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, CooldownMultiplier);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionFront);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionSide);
+	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionBack);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, MaxHealth, OldMaxHealth);
 }
 
 void UPEBaseCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
@@ -29,20 +41,50 @@ void UPEBaseCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& Ol
 		return;
 	}
 	
-	HealthBarWidget->UpdateHealthBar(PlayerCharacter->AttributeSet);
+	HealthBarWidget->ServerUpdateHealthBar(PlayerCharacter->AttributeSet);
 }
 
 void UPEBaseCharacterAttributeSet::OnRep_Speed(const FGameplayAttributeData& OldSpeed)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, Health, OldSpeed);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, Speed, OldSpeed);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_AttackSpeed(const FGameplayAttributeData& OldAttackSpeed)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, AttackSpeed, OldAttackSpeed);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_AbilityCostMultiplier(const FGameplayAttributeData& OldAbilityCostMultiplier)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, AbilityCostMultiplier, OldAbilityCostMultiplier);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_CooldownMultiplier(const FGameplayAttributeData& OldCooldownMultiplier)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, CooldownMultiplier, OldCooldownMultiplier);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_DamageDirectionFront(const FGameplayAttributeData& OldDamageDirectionFront)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionFront, OldDamageDirectionFront);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_DamageDirectionSide(const FGameplayAttributeData& OldDamageDirectionSide)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionSide, OldDamageDirectionSide);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_DamageDirectionBack(const FGameplayAttributeData& OldDamageDirectionBack)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionBack, OldDamageDirectionBack);
 }
 
 void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
-	if (InHealth >= 100.0f)
+	if (InHealth >= GetMaxHealth())
 	{
-		Health = 100.0f;
+		Health = GetMaxHealth();
 	}
 	else
 	{
