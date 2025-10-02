@@ -10,6 +10,7 @@
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEEtherCompass.h"
 #include "PEHealthBarWidget.h"
+#include "PEBasePassiveAbilityActor.h"
 #include "PEPlayerHUD.h"
 #include "Components/WidgetComponent.h"
 #include "PEPlayerCharacter.generated.h"
@@ -32,6 +33,8 @@ inline FString EDamageDirection_ToString(EDamageDirection e)
 		default: return "Unimplemented DamageDirection";
 	}
 }
+
+DECLARE_DELEGATE_OneParam(FOnEnemyHitDelegate, APEPlayerCharacter*);
 
 /*
  * 
@@ -77,7 +80,13 @@ public:
 	UDataTable* DataTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> PassiveAbility;
+	TSubclassOf<APEBasePassiveAbilityActor> PassiveAbilityClass;
+
+	UPROPERTY(Replicated)
+	APEBasePassiveAbilityActor* PassiveAbilityActor;
+	
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	// TSubclassOf<UGameplayAbility> PassiveAbility;
 
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle PassiveAbilityHandle;
@@ -111,14 +120,14 @@ public:
 	
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
 	TSubclassOf<UPEPlayerHUD> HUDClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Compass")
 	TSubclassOf<APEEtherCompass> EtherCompassClass;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	APEEtherCompass* EtherCompassActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Compass")
@@ -138,6 +147,8 @@ public:
 	
 	bool bIsLookingAtInteractableActor;
 	
+	FOnEnemyHitDelegate OnEnemyHitDelegate;
+	
 	UFUNCTION(Client, Unreliable)
 	void ClientRemovePlayerHUD();
 	
@@ -149,6 +160,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health Bar")
 	void UpdateHealthBar();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerCleanupPlayerCharacter();
 	
 protected:
 	// Called when the game starts or when spawned

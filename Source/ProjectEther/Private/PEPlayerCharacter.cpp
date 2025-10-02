@@ -25,6 +25,10 @@ APEPlayerCharacter::APEPlayerCharacter():
 	bReplicates = true;
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+
+	// PassiveAbilityComponent = CreateDefaultSubobject<UPEBasePassiveAbilityComponent>(TEXT("PassiveAbilityComponent"));
+	// PassiveAbilityComponent = NewObject<UPEBasePassiveAbilityComponent>(this, BP_PassiveAbilityComponent->StaticClass());
+	
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AttributeSet = CreateDefaultSubobject<UPEBaseCharacterAttributeSet>(TEXT("AttributeSet"));
 	CarrySceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CarrySceneComponent"));
@@ -36,6 +40,7 @@ APEPlayerCharacter::APEPlayerCharacter():
 	CarrySceneComponent->SetupAttachment(RootComponent);
 	EtherCompassSceneComponent->SetupAttachment(RootComponent);
 	HealthBarWidgetComponent->SetupAttachment(RootComponent);
+	// PassiveAbilityComponent->SetupAttachment(RootComponent);
 
 	HealthBarWidgetComponent->SetIsReplicated(true);
 }
@@ -60,6 +65,8 @@ void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityOneHandle, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(APEPlayerCharacter, WeaponAbilityTwoHandle, COND_OwnerOnly);
 	DOREPLIFETIME(APEPlayerCharacter, CarriedInteractableActor);
+	DOREPLIFETIME(APEPlayerCharacter, EtherCompassActor);
+	DOREPLIFETIME(APEPlayerCharacter, PassiveAbilityActor);
 }
 
 void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
@@ -144,7 +151,7 @@ void APEPlayerCharacter::BeforeDestroy()
 	SpectatorPawn->SetActorLocation(GetActorLocation());
 	PlayerController->ServerDropInteractableActor(PlayerController);
 	PlayerController->Possess(SpectatorPawn);
-	EtherCompassActor->Destroy();
+	ServerCleanupPlayerCharacter();
 }
 
 void APEPlayerCharacter::IsLookingAtInteractable()
@@ -222,7 +229,23 @@ void APEPlayerCharacter::UpdateHealthBar()
 	HealthBarWidget->HealthBar->SetPercent(fPercentage);
 }
 
-// Called when the game starts or when spawned
+void APEPlayerCharacter::ServerCleanupPlayerCharacter_Implementation()
+{
+	if (GetNetMode() < NM_Client)
+	{
+		if (IsValid(EtherCompassActor))
+		{
+			EtherCompassActor->Destroy();
+		}
+
+		if (IsValid(PassiveAbilityActor))
+		{
+			PassiveAbilityActor->Destroy();
+		}
+	}
+}
+
+// Called when the game starts or when spawned.
 void APEPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -233,24 +256,57 @@ void APEPlayerCharacter::BeginPlay()
 	}
 	
 	float InSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Speed"), TEXT("Could not find PEBaseAttributeSet.Speed"))->BaseValue;
+	float InMaxHealth = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.MaxHealth"), TEXT("Could not find PEBaseAttributeSet.MaxHealth"))->BaseValue;
 	float InHealth = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Health"), TEXT("Could not find PEBaseAttributeSet.Health"))->BaseValue;
+	float InAttackSpeed = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.AttackSpeed"), TEXT("Could not find PEBaseAttributeSet.AttackSpeed"))->BaseValue;
+	float InAbilityCostMultiplier = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.AbilityCostMultiplier"), TEXT("Could not find PEBaseAttributeSet.AbilityCostMultiplier"))->BaseValue;
+	float InCooldownMultiplier = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.CooldownMultiplier"), TEXT("Could not find PEBaseAttributeSet.CooldownMultiplier"))->BaseValue;
+	float InDamageDirectionFront = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionFront"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionFront"))->BaseValue;
+	float InDamageDirectionSide = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionSide"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionSide"))->BaseValue;
+	float InDamageDirectionBack = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionBack"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionBack"))->BaseValue;
+	
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetMaxHealth(InMaxHealth);
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetHealth(InHealth);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetAttackSpeed(InAttackSpeed);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetAbilityCostMultiplier(InAbilityCostMultiplier);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetCooldownMultiplier(InCooldownMultiplier);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionFront(InDamageDirectionFront);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionSide(InDamageDirectionSide);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionBack(InDamageDirectionBack);
 	
 	UE_LOG(LogTemp, Warning, TEXT("My Speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
+	UE_LOG(LogTemp, Warning, TEXT("My MaxHealth is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetMaxHealth())
 	UE_LOG(LogTemp, Warning, TEXT("My Health is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetHealth())
+	UE_LOG(LogTemp, Warning, TEXT("My AttackSpeed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetAttackSpeed())
+	UE_LOG(LogTemp, Warning, TEXT("My AbilityCostMultiplier is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetAbilityCostMultiplier())
+	UE_LOG(LogTemp, Warning, TEXT("My CooldownMultiplier is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetCooldownMultiplier())
+	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionFront is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionFront())
+	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionSide is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionSide())
+	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionBack is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionBack())
 
 	if (!IsValid(HUDClass))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid HUDClass"))
 	}
 
-	if (IsValid(EtherCompassClass))
-	{
-		EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
-		EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		EtherCompassActor->SetOwner(this);
-	}
+	// if (IsValid(EtherCompassClass))
+	// {
+	// 	EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
+	// 	EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	// 	EtherCompassActor->SetOwner(this);
+	// }
+	//
+	// if (IsValid(PassiveAbilityClass))
+	// {
+	// 	// PassiveAbilityComponent = NewObject<UPEBasePassiveAbilityComponent>(this, BP_PassiveAbilityComponent->StaticClass());
+	// 	// PassiveAbilityComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	//
+	// 	PassiveAbilityActor = Cast<APEBasePassiveAbilityActor>(GetWorld()->SpawnActor(PassiveAbilityClass));
+	// 	PassiveAbilityActor->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	// 	PassiveAbilityActor->SetOwner(this);
+	// 	PassiveAbilityActor->SetupPassiveAbility();
+	// }
 
 	if (IsValid(HealthBarWidgetClass))
 	{
@@ -274,7 +330,33 @@ void APEPlayerCharacter::BeginPlay()
 	
 	if (GetNetMode() < NM_Client)
 	{
-		PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbility);
+		// TODO: Possibly not going need this
+		// if (!IsValid(PassiveAbilityActor))
+		// {
+		// 	PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbilityActor->PassiveAbility);	
+		// } else
+		// {
+		// 	UE_LOG(LogTemp, Warning, TEXT("Invalid PassiveAbilityActor"))
+		// }
+
+		if (IsValid(EtherCompassClass))
+		{
+			EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
+			EtherCompassActor->AttachToComponent(EtherCompassSceneComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			EtherCompassActor->SetOwner(this);
+		}
+
+		if (IsValid(PassiveAbilityClass))
+		{
+			// PassiveAbilityComponent = NewObject<UPEBasePassiveAbilityComponent>(this, BP_PassiveAbilityComponent->StaticClass());
+			// PassiveAbilityComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+			PassiveAbilityActor = Cast<APEBasePassiveAbilityActor>(GetWorld()->SpawnActor(PassiveAbilityClass));
+			PassiveAbilityActor->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			PassiveAbilityActor->SetOwner(this);
+			PassiveAbilityActor->SetupPassiveAbility();
+		}
+		
 		WeaponAbilityOneHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityOne);
 		WeaponAbilityTwoHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityTwo);
 		AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOne);
