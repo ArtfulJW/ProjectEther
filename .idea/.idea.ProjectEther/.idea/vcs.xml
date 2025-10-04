@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Perforce" />
+    <mapping directory="D:/UnrealEngineSourceCode" vcs="Git" />
   </component>
 </project>
