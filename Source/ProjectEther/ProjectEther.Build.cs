@@ -8,7 +8,7 @@ public class ProjectEther : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "OnlineSubsystem" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "OnlineSubsystem", "SlateCore", "GameplayTags" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemUtils", "InteractiveToolsFramework" });
 

@@ -8,9 +8,13 @@
 #include "PEEquipmentCache.h"
 #include "PEEther.h"
 #include "PEGameState.h"
+#include "PEPlayerState.h"
 #include "Components/TextBlock.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameMode.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -18,11 +22,16 @@
 
 APEPlayerCharacter::APEPlayerCharacter():
 	fInteractDistance(500.0f),
-	bIsLookingAtInteractableActor(false)
+	bIsLookingAtInteractableActor(false),
+	bTeamTagTextUpdated(false),
+	bIsRunning(false),
+	DamageDirectionRotation(FRotator(0,0,0)),
+	fMaxHealthMaxValue(0.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bAlwaysRelevant = true;
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 
@@ -34,15 +43,24 @@ APEPlayerCharacter::APEPlayerCharacter():
 	CarrySceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CarrySceneComponent"));
 	EtherCompassSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("EtherCompassSceneComponent"));
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	DamageDirectionComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("DamageDirectionComponent"));
+	FPSArms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPSArms"));
 	
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	CameraComponent->SetupAttachment(RootComponent);
 	CarrySceneComponent->SetupAttachment(RootComponent);
 	EtherCompassSceneComponent->SetupAttachment(RootComponent);
 	HealthBarWidgetComponent->SetupAttachment(RootComponent);
+	DamageDirectionComponent->SetupAttachment(RootComponent);
 	// PassiveAbilityComponent->SetupAttachment(RootComponent);
+	FPSArms->SetupAttachment(CameraComponent);
 
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Full);
 	HealthBarWidgetComponent->SetIsReplicated(true);
+	DamageDirectionComponent->SetIsReplicated(true);
+
+	FPSArms->SetVisibility(false);
 }
 
 UAbilitySystemComponent* APEPlayerCharacter::GetAbilitySystemComponent() const
@@ -67,6 +85,11 @@ void APEPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME(APEPlayerCharacter, CarriedInteractableActor);
 	DOREPLIFETIME(APEPlayerCharacter, EtherCompassActor);
 	DOREPLIFETIME(APEPlayerCharacter, PassiveAbilityActor);
+	DOREPLIFETIME(APEPlayerCharacter, CopiedTeamTagText);
+	DOREPLIFETIME(APEPlayerCharacter, bIsRunning);
+	DOREPLIFETIME(APEPlayerCharacter, DamageDirectionRotation);
+	DOREPLIFETIME(APEPlayerCharacter, WeaponActor);
+	DOREPLIFETIME(APEPlayerCharacter, AttributeSet);
 }
 
 void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
@@ -74,9 +97,11 @@ void APEPlayerCharacter::ClientRemovePlayerHUD_Implementation()
 	PlayerHUD->RemoveFromParent();
 }
 
-EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& HitResult) const
+EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& HitResult, FLinearColor InColor) const
 {
-	const AActor* HitActor = HitResult.GetActor();
+	AActor* HitActor = HitResult.GetActor();
+	APEPlayerCharacter* HitPlayerCharacter = Cast<APEPlayerCharacter>(HitActor);
+	APEPlayerController* HitPlayerController = Cast<APEPlayerController>(HitPlayerCharacter->GetController());
 	FVector InVector = HitResult.Location;
 	FVector ForwardVector = HitActor->GetActorLocation() + HitActor->GetActorForwardVector() * 100;
 	InVector.Z = GetActorLocation().Z;
@@ -99,16 +124,28 @@ EDamageDirection APEPlayerCharacter::DetermineDamageDirection(const FHitResult& 
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from front: %f"), Angle);
 		DamageDirection = EDamageDirection::Front;
+		HitPlayerCharacter->ServerActivateHitIndicator(EDirectionDamageIndicator::Front, InColor);
 	}
 	else if (Angle >= 45.0f && Angle <= 135.0f)
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from sides: %f"), Angle);
 		DamageDirection = EDamageDirection::Side;
+		if (InVector.Y < 0.0f)
+		{
+			// Left Side
+			HitPlayerCharacter->ServerActivateHitIndicator(EDirectionDamageIndicator::Left, InColor);
+		}
+		else
+		{
+			// Right Side
+			HitPlayerCharacter->ServerActivateHitIndicator(EDirectionDamageIndicator::Right, InColor);
+		}
 	}
 	else if (Angle >= 135.0f && Angle <= 180.0f)
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Damage from back: %f"), Angle);
 		DamageDirection = EDamageDirection::Back;
+		HitPlayerCharacter->ServerActivateHitIndicator(EDirectionDamageIndicator::Back, InColor);
 	}
 
 	return DamageDirection;
@@ -242,6 +279,164 @@ void APEPlayerCharacter::ServerCleanupPlayerCharacter_Implementation()
 		{
 			PassiveAbilityActor->Destroy();
 		}
+
+		if (IsValid(WeaponActor))
+		{
+			WeaponActor->Destroy();
+		}
+
+		if (IsValid(FirstPersonWeapon))
+		{
+			FirstPersonWeapon->Destroy();
+		}
+	}
+}
+
+void APEPlayerCharacter::UpdateTeamTagDisplay(const FText& InTag)
+{
+	if (HealthBarWidgetComponent)
+	{
+		UPEHealthBarWidget* HealthBarWidget = Cast<UPEHealthBarWidget>(HealthBarWidgetComponent->GetWidget());
+		if (!IsValid(HealthBarWidget))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid HealthBarWidget"))
+			return;
+		}
+
+		HealthBarWidget->TeamTag->SetText(InTag);
+		HealthBarWidget->TeamTag->SetColorAndOpacity(ETeam_GetTeamColor(ETeam_GetTeamFromString(InTag)));
+
+		if (!IsValid(PlayerHUD))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerHUD"))
+			return;
+		}
+			
+		PlayerHUD->HUDTeamTagTextBlock->SetText(InTag);
+		PlayerHUD->HUDTeamTagTextBlock->SetColorAndOpacity(ETeam_GetTeamColor(ETeam_GetTeamFromString(InTag)));
+		
+		bTeamTagTextUpdated = true;
+	}
+}
+
+void APEPlayerCharacter::OnRep_CopiedTeamTagText()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_CopiedTeamTagText called for %s: %s"), *GetName(), *CopiedTeamTagText.ToString());
+	UpdateTeamTagDisplay(CopiedTeamTagText);
+
+	if (!IsValid(PlayerHUD))
+	{
+		return;
+	}
+	
+	PlayerHUD->SetHUDTeamTag(CopiedTeamTagText);
+	PlayerHUD->HUDTeamTagTextBlock->SetColorAndOpacity(ETeam_GetTeamColor(ETeam_GetTeamFromString(CopiedTeamTagText)));
+}
+
+void APEPlayerCharacter::ServerSetCopiedTeamTagText_Implementation(APEPlayerState* InPlayerState)
+{
+	if (IsValid(InPlayerState))
+	{
+		CopiedTeamTagText = InPlayerState->TeamTagText;
+	}
+}
+
+void APEPlayerCharacter::TryUpdateTeamTagDisplay()
+{
+	APEPlayerState* InPlayerState = GetPlayerState<APEPlayerState>();
+	if (IsValid(InPlayerState))
+	{
+		UpdateTeamTagDisplay(InPlayerState->TeamTagText);
+	}
+}
+
+void APEPlayerCharacter::ServerRunEvent_Implementation()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
+	if (!bIsRunning)
+	{
+		if (!RunningGameplayEffect->IsValidLowLevel())
+		{
+			UE_LOG(LogTemp, Error, TEXT("RunningGameplayEffect is not a valid low-level object!"));
+		}
+		
+		RunningEffectContext = AbilitySystemComponent->MakeEffectContext();
+		RunningEffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(RunningGameplayEffect, 1.0f, RunningEffectContext);
+
+		if (!RunningEffectSpecHandle.IsValid())
+		{
+			return;
+		}
+
+		RunningEffectSpec = RunningEffectSpecHandle.Data.Get();
+		if (RunningEffectSpec)
+		{
+			RunningEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*RunningEffectSpec);
+			bIsRunning = true;
+		}
+	}
+}
+
+void APEPlayerCharacter::ServerStopRunEvent_Implementation()
+{
+	AbilitySystemComponent->RemoveActiveGameplayEffect(RunningEffectHandle);
+	bIsRunning = false;
+}
+
+// float APEPlayerCharacter::GetMaxHealthMaxValue()
+// {
+// 	return DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.MaxHealth"), TEXT("Could not find PEBaseAttributeSet.MaxHealth"))->MaxValue;
+// }
+
+void APEPlayerCharacter::ServerActivateHitIndicator_Implementation(EDirectionDamageIndicator InDirection, FLinearColor InColor)
+{
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetController());
+	if (IsValid(PlayerController))
+	{
+		PlayerController->ClientProcessActivateHitIndicator(InDirection, InColor);
+	}
+}
+
+void APEPlayerCharacter::MulticastPlayAnimMontage_Implementation(UAnimMontage* InAnimMontage)
+{
+	PlayAnimMontage(InAnimMontage);
+}
+
+void APEPlayerCharacter::PlayFPSArmsAnimMontage(UAnimMontage* InAnimMontage)
+{
+	if (!IsValid(InAnimMontage))
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance = FPSArms->GetAnimInstance();
+	if (!IsValid(AnimInstance))
+	{
+		return;
+	}
+	
+	AnimInstance->Montage_Play(InAnimMontage);
+}
+
+void APEPlayerCharacter::ClientCleanupClientWeapon_Implementation()
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+	
+	if (IsValid(FirstPersonWeapon))
+	{
+		FirstPersonWeapon->Destroy();
+	}
+
+	if (IsValid(WeaponActor))
+	{
+		WeaponActor->Destroy();
 	}
 }
 
@@ -264,6 +459,17 @@ void APEPlayerCharacter::BeginPlay()
 	float InDamageDirectionFront = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionFront"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionFront"))->BaseValue;
 	float InDamageDirectionSide = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionSide"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionSide"))->BaseValue;
 	float InDamageDirectionBack = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.DamageDirectionBack"), TEXT("Could not find PEBaseAttributeSet.DamageDirectionBack"))->BaseValue;
+	float InJumpMagnitude = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.JumpMagnitude"), TEXT("Could not find PEBaseAttributeSet.JumpMagnitude"))->BaseValue;
+	float InResource = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Resource"), TEXT("Could not find PEBaseAttributeSet.Resource"))->BaseValue;
+	float InResourceMaxValue = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.Resource"), TEXT("Could not find PEBaseAttributeSet.Resource"))->MaxValue;
+	float InResourceReplenishRate = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.ResourceReplenishRate"), TEXT("Could not find PEBaseAttributeSet.ResourceReplenishRate"))->BaseValue;
+
+	float fOnTakeDamageResourceReplenishRate = 0.0f;
+	FAttributeMetaData* OnTakeDamageResourceReplenishRate = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.OnTakeDamageResourceReplenishRate"), TEXT("Could not find PEBaseAttributeSet.OnTakeDamageResourceReplenishRate"));
+	if (OnTakeDamageResourceReplenishRate != nullptr)
+	{
+		fOnTakeDamageResourceReplenishRate = OnTakeDamageResourceReplenishRate->BaseValue;
+	}
 	
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetSpeed(InSpeed);
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetMaxHealth(InMaxHealth);
@@ -274,6 +480,13 @@ void APEPlayerCharacter::BeginPlay()
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionFront(InDamageDirectionFront);
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionSide(InDamageDirectionSide);
 	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetDamageDirectionBack(InDamageDirectionBack);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetJumpMagnitude(InJumpMagnitude);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetResource(InResource);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetResourceMaxValue(InResourceMaxValue);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetResourceReplenishRate(InResourceReplenishRate);
+	Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->SetOnTakeDamageResourceReplenishRate(fOnTakeDamageResourceReplenishRate);
+
+	fMaxHealthMaxValue = DataTable->FindRow<FAttributeMetaData>(FName("PEBaseAttributeSet.MaxHealth"), TEXT("Could not find PEBaseAttributeSet.MaxHealth"))->MaxValue;
 	
 	UE_LOG(LogTemp, Warning, TEXT("My Speed is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetSpeed())
 	UE_LOG(LogTemp, Warning, TEXT("My MaxHealth is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetMaxHealth())
@@ -284,7 +497,20 @@ void APEPlayerCharacter::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionFront is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionFront())
 	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionSide is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionSide())
 	UE_LOG(LogTemp, Warning, TEXT("My DamageDirectionBack is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetDamageDirectionBack())
+	UE_LOG(LogTemp, Warning, TEXT("My JumpMagnitude is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetJumpMagnitude())
+	UE_LOG(LogTemp, Warning, TEXT("My Resource is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetResource())
+	UE_LOG(LogTemp, Warning, TEXT("My ResourceReplenishRate is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetResourceReplenishRate())
+	UE_LOG(LogTemp, Warning, TEXT("My OnTakeDamageResourceReplenishRate is set to: %f"), Cast<UPEBaseCharacterAttributeSet>(AttributeSet)->GetOnTakeDamageResourceReplenishRate())
 
+	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+	if (!IsValid(CharacterMovementComponent))
+	{
+		return;
+	}
+
+	CharacterMovementComponent->MaxWalkSpeed = 1000.f;
+	CharacterMovementComponent->AirControl = 0.2f;
+	
 	if (!IsValid(HUDClass))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid HUDClass"))
@@ -316,6 +542,36 @@ void APEPlayerCharacter::BeginPlay()
 		HealthBarWidgetComponent->SetDrawAtDesiredSize(true);
 		HealthBarWidgetComponent->SetWidgetClass(HealthBarWidgetClass);
 		HealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		HealthBarWidgetComponent->SetOwnerPlayer(GetWorld()->GetFirstLocalPlayerFromController());
+		HealthBarWidgetComponent->InitWidget();
+	}
+
+	if (IsValid(DamageDirectionComponentClass))
+	{
+		// DamageDirectionComponent->SetDrawAtDesiredSize(true);
+		DamageDirectionComponent->SetWidgetClass(DamageDirectionComponentClass);
+		DamageDirectionComponent->SetWidgetSpace(EWidgetSpace::World);
+		DamageDirectionComponent->SetOwnerPlayer(GetWorld()->GetFirstLocalPlayerFromController());
+		UPEDamageDirectionComponent* DDC = Cast<UPEDamageDirectionComponent>(DamageDirectionComponent->GetWidget());
+		if (IsValid(DDC))
+		{
+			DDC->SetOwningWidgetComponent(DamageDirectionComponent);
+		}
+		
+		DamageDirectionComponent->InitWidget();
+	}
+
+	if (IsValid(AbilityOneContainerClass))
+	{
+		AbilityOneContainer = NewObject<UAbilityContainer>(this,AbilityOneContainerClass);
+	}
+	if (IsValid(AbilityTwoContainerClass))
+	{
+		AbilityTwoContainer = NewObject<UAbilityContainer>(this,AbilityTwoContainerClass);
+	}
+	if (IsValid(AbilityThreeContainerClass))
+	{
+		AbilityThreeContainer = NewObject<UAbilityContainer>(this, AbilityThreeContainerClass);
 	}
 	
 	if (IsLocallyControlled())
@@ -326,19 +582,42 @@ void APEPlayerCharacter::BeginPlay()
 		ensureMsgf(PlayerHUD, TEXT("PlayerHUD failed to instantiate properly"));
 		PlayerHUD->AddToViewport();
 		PC->SubscribeToGameState(this->GetClass());
+
+		APEPlayerState* PEPlayerState = GetPlayerState<APEPlayerState>();
+		if (IsValid(PEPlayerState))
+		{
+			if (!PEPlayerState->TeamTagText.IsEmpty())
+			{
+				UpdateTeamTagDisplay(PEPlayerState->TeamTagText);
+			}
+			else
+			{
+				ServerSetCopiedTeamTagText(PEPlayerState);
+			}
+		}
+		
+		FPSArms->SetVisibility(true);
+
+		FirstPersonWeapon = Cast<APEWeapon>(GetWorld()->SpawnActor(WeaponClass));
+		FirstPersonWeapon->AttachToComponent(FPSArms, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), FirstPersonWeapon->WeaponSocket);
+
+		const USkeletalMeshSocket* FirstPersonWeaponSkeletalMesh = FirstPersonWeapon->WeaponSkeletalMeshComponent->GetSocketByName("top_hand_JntSocket");
+		if (IsValid(FirstPersonWeaponSkeletalMesh))
+		{
+			FVector HandleJointLocation = FirstPersonWeaponSkeletalMesh->GetSocketTransform(FirstPersonWeapon->WeaponSkeletalMeshComponent).GetLocation();
+			FVector WeaponOriginLocation = FirstPersonWeapon->GetTransform().GetLocation();
+			FirstPersonWeapon->AddActorWorldTransform(FTransform(FVector(WeaponOriginLocation - HandleJointLocation)));
+			FirstPersonWeapon->AddActorLocalRotation(FirstPersonWeaponSkeletalMesh->GetSocketLocalTransform().GetRotation());	
+		}
+		FirstPersonWeapon->SetOwner(this);
+
+		// FPSBasicMeleeAttackMontage = FirstPersonWeapon->MainWeaponAbilityContainer.FPSAnimMontage;
+		// FPSSecondaryMeleeAttackMontage = FirstPersonWeapon->SecondaryWeaponAbilityContainer.FPSAnimMontage;
+		GetMesh()->SetVisibility(false);
 	}
 	
 	if (GetNetMode() < NM_Client)
 	{
-		// TODO: Possibly not going need this
-		// if (!IsValid(PassiveAbilityActor))
-		// {
-		// 	PassiveAbilityHandle = AbilitySystemComponent->GiveAbility(PassiveAbilityActor->PassiveAbility);	
-		// } else
-		// {
-		// 	UE_LOG(LogTemp, Warning, TEXT("Invalid PassiveAbilityActor"))
-		// }
-
 		if (IsValid(EtherCompassClass))
 		{
 			EtherCompassActor = Cast<APEEtherCompass>(GetWorld()->SpawnActor(EtherCompassClass));
@@ -357,11 +636,46 @@ void APEPlayerCharacter::BeginPlay()
 			PassiveAbilityActor->SetupPassiveAbility();
 		}
 		
-		WeaponAbilityOneHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityOne);
-		WeaponAbilityTwoHandle = AbilitySystemComponent->GiveAbility(WeaponAbilityTwo);
-		AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOne);
-		AbilityTwoHandle = AbilitySystemComponent->GiveAbility(AbilityTwo);
-		AbilityThreeHandle = AbilitySystemComponent->GiveAbility(AbilityThree);
+		// PlayerCharacters must have their Weapons equipped before starting.
+		if (IsValid(WeaponClass))
+		{
+			WeaponActor = Cast<APEWeapon>(GetWorld()->SpawnActor(WeaponClass));
+			WeaponActor->AttachToComponent(this->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), WeaponActor->WeaponSocket);
+
+			const USkeletalMeshSocket* SocketOffset = WeaponActor->WeaponSkeletalMeshComponent->GetSocketByName("top_hand_JntSocket");
+			if (IsValid(SocketOffset))
+			{
+				FVector HandleJointLocation = SocketOffset->GetSocketTransform(WeaponActor->WeaponSkeletalMeshComponent).GetLocation();
+				FVector WeaponOriginLocation = WeaponActor->GetTransform().GetLocation();
+				WeaponActor->AddActorWorldTransform(FTransform(FVector(WeaponOriginLocation - HandleJointLocation)));	
+			}
+			WeaponActor->SetOwner(this);
+
+			if (IsValid(WeaponActor->MainWeaponAbilityContainer))
+			{
+				WeaponAbilityOneHandle = AbilitySystemComponent->GiveAbility(WeaponActor->MainWeaponAbilityContainer->Ability);
+			}
+			if (IsValid(WeaponActor->SecondaryWeaponAbilityContainer))
+			{
+				WeaponAbilityTwoHandle = AbilitySystemComponent->GiveAbility(WeaponActor->SecondaryWeaponAbilityContainer->Ability);
+			}
+			
+			// BasicMeleeAttackMontage = WeaponActor->MainWeaponAbilityContainer.CharacterAnimMontage;
+			// SecondaryMeleeAttackMontage = WeaponActor->SecondaryWeaponAbilityContainer.CharacterAnimMontage;
+		}
+		
+		if (IsValid(AbilityOneContainer))
+		{
+			AbilityOneHandle = AbilitySystemComponent->GiveAbility(AbilityOneContainer->Ability);
+		}
+		if (IsValid(AbilityTwoContainer))
+		{
+			AbilityTwoHandle = AbilitySystemComponent->GiveAbility(AbilityTwoContainer->Ability);
+		}
+		if (IsValid(AbilityThreeContainer))
+		{
+			AbilityThreeHandle = AbilitySystemComponent->GiveAbility(AbilityThreeContainer->Ability);
+		}
 	}
 }
 
@@ -370,4 +684,67 @@ void APEPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	IsLookingAtInteractable();
+	if (!bTeamTagTextUpdated)
+	{
+		TryUpdateTeamTagDisplay();
+	}
+
+	if (IsLocallyControlled())
+	{
+		PlayerHUD->UpdateGenericResourceBar(AttributeSet->GetResource()/AttributeSet->GetResourceMaxValue());
+		PlayerHUD->UpdateResourceTexts(AttributeSet);
+
+		if (IsValid(WeaponActor) && WeaponActor->WeaponSkeletalMeshComponent->IsVisible())
+		{
+			WeaponActor->WeaponSkeletalMeshComponent->SetVisibility(false);
+		}
+	}
+	
+	// if (IsValid(WeaponActor) && WeaponActor->WeaponSkeletalMeshComponent->IsVisible())
+	// {
+	// 	WeaponActor->WeaponSkeletalMeshComponent->SetVisibility(false);
+	// }
+
+	if (bIsChained)
+	{
+		FVector deltaLocation = ChainSpringInterpolator.Update(GetActorLocation(), ChainSpringInterpolator.GetPosition(), DeltaTime);
+		SetActorLocation(deltaLocation);
+	}
+}
+
+void APEPlayerCharacter::OnRep_DamageDirectionRotation() const
+{
+	DamageDirectionComponent->SetWorldRotation(DamageDirectionRotation);
+}
+
+void APEPlayerCharacter::ServerSetDamageDirectionImageRotation_Implementation(const FRotator& InRotation)
+{
+	DamageDirectionRotation = InRotation;
+	OnRep_DamageDirectionRotation();
+}
+
+void APEPlayerCharacter::AllowBasicAttack(const APEPlayerCharacter* TargetPlayerCharacter)
+{
+	if (!IsValid(TargetPlayerCharacter))
+	{
+		return;
+	}
+	
+	APEPlayerController* TargetPlayerController = Cast<APEPlayerController>(TargetPlayerCharacter->GetController());
+	TargetPlayerController->bCanBasicAttack = true;
+}
+
+void APEPlayerCharacter::ChainPlayer(FVector OriginVector, float Duration, FRK4SpringInterpolator<FVector> InSpring)
+{
+	ChainSpringInterpolator = InSpring;
+	bIsChained = true;
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindLambda([this](){bIsChained = false;});
+
+	UWorld* World = GetWorld();
+	World->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, Duration, false);
+	
+	ChainSpringInterpolator.SetPosition(GetActorLocation());
+	ChainedTargetLocation = OriginVector;
 }

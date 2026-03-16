@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PEEtherDepositHomeIconWidget.h"
 #include "PEEtherWarStructs.h"
 #include "Components/BoxComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"
 #include "PEEtherDeposit.generated.h"
 
@@ -27,6 +29,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Destroyed() override;
+
+	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
 	ETeam Team; 
@@ -51,6 +55,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
 	UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
+	TSubclassOf<UPEEtherDepositHomeIconWidget> HomeIconWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Deposit Specs")
+	UWidgetComponent* HomeIconWidgetComponent;
 
 	UFUNCTION(BlueprintCallable, Category = "Ether Deposit Functions")
 	void DepositEther(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

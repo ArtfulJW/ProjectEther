@@ -4,6 +4,7 @@
 #include "PEPickClassHUD.h"
 
 #include "PEGameState.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
 
 void UPEPickClassHUD::NativeConstruct()
@@ -13,6 +14,7 @@ void UPEPickClassHUD::NativeConstruct()
 	BerserkerClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetBerserkerClassAndRequestSpawn);
 	MageClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetMageClassAndRequestSpawn);
 	PriestClassButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SetPriestClassAndRequestSpawn);
+	SpectatorPawnButton->OnClicked.AddDynamic(this, &UPEPickClassHUD::SelectSpectatorPawnAndRequestSpawn);
 }
 
 void UPEPickClassHUD::SetBerserkerClassAndRequestSpawn()
@@ -47,4 +49,21 @@ void UPEPickClassHUD::SetPriestClassAndRequestSpawn()
 	PlayerController->RequestTeamAssignment();
 	PlayerController->ClientSetupInputControls();
 	PlayerController->RequestSpawn();
+}
+
+void UPEPickClassHUD::SelectSpectatorPawnAndRequestSpawn()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+	
+	APEPlayerController* PlayerController = Cast<APEPlayerController>(GetOwningPlayer());
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+	
+	PlayerController->ServerRequestSpectatorSpawn();
 }

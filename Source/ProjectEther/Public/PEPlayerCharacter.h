@@ -7,13 +7,18 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemComponent.h"
+#include "PEDamageDirectionComponent.h"
 #include "PEBaseCharacterAttributeSet.h"
 #include "PEEtherCompass.h"
 #include "PEHealthBarWidget.h"
 #include "PEBasePassiveAbilityActor.h"
 #include "PEPlayerHUD.h"
+#include "PEWeapon.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/SpringInterpolator.h"
 #include "PEPlayerCharacter.generated.h"
+
+class APEPlayerState;
 
 UENUM(BlueprintType)
 enum class EDamageDirection : uint8
@@ -35,6 +40,8 @@ inline FString EDamageDirection_ToString(EDamageDirection e)
 }
 
 DECLARE_DELEGATE_OneParam(FOnEnemyHitDelegate, APEPlayerCharacter*);
+
+DECLARE_DELEGATE(FOnTakeDamage);
 
 /*
  * 
@@ -70,7 +77,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	float fInteractDistance;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Character Specs")
 	UPEBaseCharacterAttributeSet* AttributeSet;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Gameplay")
@@ -84,42 +91,57 @@ public:
 
 	UPROPERTY(Replicated)
 	APEBasePassiveAbilityActor* PassiveAbilityActor;
-	
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	// TSubclassOf<UGameplayAbility> PassiveAbility;
 
 	UPROPERTY(BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle PassiveAbilityHandle;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> WeaponAbilityOne;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle WeaponAbilityOneHandle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> WeaponAbilityTwo;
-
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle WeaponAbilityTwoHandle;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> AbilityOne;
+	TSubclassOf<UAbilityContainer> AbilityOneContainerClass;
+
+	UPROPERTY()
+	UAbilityContainer* AbilityOneContainer;
 	
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityOneHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> AbilityTwo;
+	TSubclassOf<UAbilityContainer> AbilityTwoContainerClass;
+
+	UPROPERTY()
+	UAbilityContainer* AbilityTwoContainer;
 	
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityTwoHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
-	TSubclassOf<UGameplayAbility> AbilityThree;
+	TSubclassOf<UAbilityContainer> AbilityThreeContainerClass;
+
+	UPROPERTY()
+	UAbilityContainer* AbilityThreeContainer;
 	
 	UPROPERTY(Replicated, BlueprintReadWrite, Category="Character Specs")
 	FGameplayAbilitySpecHandle AbilityThreeHandle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<UGameplayEffect> RunningGameplayEffect;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	TSubclassOf<APEWeapon> WeaponClass;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Character Specs")
+	APEWeapon* WeaponActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Character Specs")
+	USkeletalMeshComponent* FPSArms;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Character Specs")
+	APEWeapon* FirstPersonWeapon;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
 	TSubclassOf<UPEPlayerHUD> HUDClass;
@@ -148,11 +170,44 @@ public:
 	bool bIsLookingAtInteractableActor;
 	
 	FOnEnemyHitDelegate OnEnemyHitDelegate;
+
+	FOnTakeDamage OnTakeDamageDelegate;
+
+	UPROPERTY(ReplicatedUsing=OnRep_CopiedTeamTagText)
+	FText CopiedTeamTagText;
+
+	bool bTeamTagTextUpdated;
+
+	FGameplayEffectContextHandle RunningEffectContext;
+
+	FGameplayEffectSpecHandle RunningEffectSpecHandle;
+	
+	FActiveGameplayEffectHandle RunningEffectHandle;
+
+	FGameplayEffectSpec* RunningEffectSpec;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Damage Direction Component Specs")
+	TSubclassOf<UPEDamageDirectionComponent> DamageDirectionComponentClass;;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Damage Direction Component Specs")
+	UWidgetComponent* DamageDirectionComponent;
+
+	UPROPERTY(Replicated)
+	bool bIsRunning;
+
+	UPROPERTY(ReplicatedUsing=OnRep_DamageDirectionRotation, EditAnywhere, BlueprintReadWrite, Category = "Damage Direction Component Specs")
+	FRotator DamageDirectionRotation;
+
+	float fMaxHealthMaxValue;
+
+	FRK4SpringInterpolator<FVector> ChainSpringInterpolator;
+	bool bIsChained = false;
+	FVector ChainedTargetLocation;
 	
 	UFUNCTION(Client, Unreliable)
 	void ClientRemovePlayerHUD();
 	
-	EDamageDirection DetermineDamageDirection(const FHitResult& HitResult) const;
+	EDamageDirection DetermineDamageDirection(const FHitResult& HitResult, FLinearColor InColor) const;
 
 	void BeforeDestroy();
 
@@ -163,6 +218,49 @@ public:
 
 	UFUNCTION(Server, Unreliable)
 	void ServerCleanupPlayerCharacter();
+
+	UFUNCTION()
+	void UpdateTeamTagDisplay(const FText& InTag);
+
+	UFUNCTION()
+	void OnRep_CopiedTeamTagText();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetCopiedTeamTagText(APEPlayerState* InPlayerState);
+
+	void TryUpdateTeamTagDisplay();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRunEvent();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerStopRunEvent();
+
+	UFUNCTION()
+	void OnRep_DamageDirectionRotation() const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetDamageDirectionImageRotation(const FRotator& InRotation);
+
+	// float GetMaxHealthMaxValue();
+
+	UFUNCTION(Server, Reliable)
+	void ServerActivateHitIndicator(EDirectionDamageIndicator InDirection, FLinearColor InColor);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayAnimMontage(UAnimMontage* InAnimMontage);
+
+	void PlayFPSArmsAnimMontage(UAnimMontage* InAnimMontage);
+
+	UFUNCTION(Client, Reliable)
+	void ClientCleanupClientWeapon();
+	
+	virtual void OnTakeDamage() PURE_VIRTUAL(APEPlayerCharacter::OnTakeAnyDamage);
+
+	UFUNCTION()
+	void AllowBasicAttack(const APEPlayerCharacter* TargetPlayerCharacter);
+
+	void ChainPlayer(FVector OriginVector, float Duration, FRK4SpringInterpolator<FVector> InSpring);
 	
 protected:
 	// Called when the game starts or when spawned

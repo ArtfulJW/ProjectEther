@@ -3,6 +3,7 @@
 #include "PEEquipmentCache.h"
 #include "PEGameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 APEEquipmentCache::APEEquipmentCache():
@@ -34,7 +35,17 @@ void APEEquipmentCache::Deploy()
 
 	bIsDeployed = true;
 	MulticastSetSimulatePhysics(false);
+	StaticMeshComponent->SetStaticMesh(OpenedEquipmentCache);
 	UE_LOG(LogTemp, Warning, TEXT("Deploying Equipment Cache"));
+}
+
+void APEEquipmentCache::Interact(APEPlayerCharacter& InteractingPlayerCharacter)
+{
+	ApplyCarryEffect();
+	InteractingPlayerCharacter.CarriedInteractableActor = this;
+	MulticastSetSimulatePhysics(false);
+	
+	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
 void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
@@ -79,20 +90,22 @@ void APEEquipmentCache::SpawnPlayer(APEPlayerController* Requester)
 	}
 	
 	APEPlayerCharacter* SpawnedPlayerCharacter = nullptr;
-
+	FVector SpawnLocation = FVector(0, 0, 250);
+	SpawnLocation = UKismetMathLibrary::TransformLocation(GetTransform(), SpawnLocation);
+	
 	switch (Requester->CharacterClass)
 	{
 	case EClassType::Base:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPlayerCharacterClass, SpawnLocation, FRotator::ZeroRotator);
 		break;
 	case EClassType::Berserker:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEBerserkerPlayerCharacterClass, SpawnLocation, FRotator::ZeroRotator);
 		break;
 	case EClassType::Mage:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEMagePlayerCharacterClass, SpawnLocation, FRotator::ZeroRotator);
 		break;
 	case EClassType::Priest:
-		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, GetTransform().GetLocation(), GetTransform().Rotator());
+		SpawnedPlayerCharacter = World->SpawnActor<APEPlayerCharacter>(Requester->PEPriestPlayerCharacterClass, SpawnLocation, FRotator::ZeroRotator);
 		break;
 	}
 	Requester->Possess(SpawnedPlayerCharacter);

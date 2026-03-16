@@ -29,6 +29,13 @@ void APEInteractableBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void APEInteractableBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APEInteractableBase, Carrier);
+}
+
 void APEInteractableBase::ApplyCarryEffect()
 {
 	if (!IsValid(Carrier))
@@ -60,16 +67,14 @@ void APEInteractableBase::RemoveCarryEffect()
 	Carrier->AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveCarryGameplayEffect);
 }
 
-void APEInteractableBase::Interact()
+void APEInteractableBase::Interact(APEPlayerCharacter& InteractingPlayerCharacter)
 {
-	IInteractableInterface::Interact();
-
 	if (!IsValid(Carrier))
 	{
 		return;
 	}
 	
-	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	AttachToComponent(InteractingPlayerCharacter.CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
 void APEInteractableBase::Deploy()

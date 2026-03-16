@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PEPlayerCharacter.h"
 #include "UObject/Interface.h"
 #include "InteractableInterface.generated.h"
 
@@ -21,7 +22,7 @@ class PROJECTETHER_API IInteractableInterface
 	GENERATED_BODY()
 
 public:
-	virtual void Interact();
+	virtual void Interact(APEPlayerCharacter& InteractingPlayerCharacter);
 	
 	virtual void Deploy();
 };

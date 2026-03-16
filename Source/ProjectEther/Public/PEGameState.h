@@ -6,6 +6,7 @@
 #include "PEEquipmentCache.h"
 #include "PEEquipmentCacheSpawner.h"
 #include "PEEther.h"
+#include "PEEtherDeposit.h"
 #include "PEEtherSpawner.h"
 #include "PEEtherSpawnRegion.h"
 #include "PEPlayerController.h"
@@ -69,6 +70,21 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game State Specs")
 	TSubclassOf<APEEquipmentCache> EquipmentCacheClass;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	APEEtherDeposit* TeamOneEtherDeposit;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	APEEtherDeposit* TeamTwoEtherDeposit;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	APEEtherSpawner* CurrentSourceSpawner;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	int TeamOneNumberEtherDeposited;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Game State Specs")
+	int TeamTwoNumberEtherDeposited;
 	
 	UFUNCTION(Server, Reliable)
 	void AssignTeamToPlayerController(APEPlayerController* Requester);
@@ -109,8 +125,16 @@ public:
 	UFUNCTION(Server, Reliable)
 	void SubscribeEquipmentCacheSpawner(APEEquipmentCacheSpawner* EquipmentCacheSpawner, ETeam EquipmentCacheTeam);
 
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	void SpawnEquipmentCache(ETeam EquipmentCacheTeam);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSubscribeEtherDeposit(APEEtherDeposit* InEtherDeposit, ETeam InEtherDepositTeam);
+
+	ETeam DetermineEtherClosestTeam(float& fEtherDistanceToGoal, float& TotalDistance);
+
+	UFUNCTION(Server, Reliable)
+	void UpdateNumberOfEtherDeposited(APEEtherDeposit* InEtherDeposit);
 
 	TArray<APEEquipmentCache*> GetTeamEquipmentCacheArray(ETeam InTeam);
 };

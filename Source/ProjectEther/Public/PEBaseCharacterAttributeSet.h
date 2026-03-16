@@ -43,6 +43,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_DamageDirectionBack, Category="Character Specs")
 	FGameplayAttributeData DamageDirectionBack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_JumpMagnitude, Category="Character Specs")
+	FGameplayAttributeData JumpMagnitude;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Resource, Category="Character Specs")
+	FGameplayAttributeData Resource;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_ResourceMaxValue, Category="Character Specs")
+	FGameplayAttributeData ResourceMaxValue;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_ResourceReplenishRate, Category="Character Specs")
+	FGameplayAttributeData ResourceReplenishRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Specs")
+	FGameplayAttributeData OnTakeDamageResourceReplenishRate;
 	
 public:
 
@@ -75,6 +90,21 @@ public:
 	UFUNCTION()
 	void OnRep_DamageDirectionBack(const FGameplayAttributeData& OldDamageDirectionBack);
 
+	UFUNCTION()
+	void OnRep_JumpMagnitude(const FGameplayAttributeData& OldJumpMagnitude);
+
+	UFUNCTION()
+	void OnRep_Resource(const FGameplayAttributeData& OldResource);
+
+	UFUNCTION()
+	void OnRep_ResourceReplenishRate(const FGameplayAttributeData& OldResourceReplenishRate);
+
+	UFUNCTION()
+	void OnRep_ResourceMaxValue(const FGameplayAttributeData& OldResourceMaxValue);
+
+	UFUNCTION(Server, Unreliable)
+	virtual void AddResource(float InAmount);
+	
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, MaxHealth);
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(MaxHealth);
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(MaxHealth);
@@ -121,4 +151,32 @@ public:
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(DamageDirectionBack);
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(DamageDirectionBack);
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(DamageDirectionBack);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, JumpMagnitude);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(JumpMagnitude);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(JumpMagnitude);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(JumpMagnitude);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, Resource);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(Resource);
+	// GAMEPLAYATTRIBUTE_VALUE_SETTER(Resource);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(Resource);
+
+	UFUNCTION(Server, Reliable)
+	void SetResource(float InAmount);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, ResourceMaxValue);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(ResourceMaxValue);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(ResourceMaxValue);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(ResourceMaxValue);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, ResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(ResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(ResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(ResourceReplenishRate);
+
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UPEBaseCharacterAttributeSet, OnTakeDamageResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(OnTakeDamageResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(OnTakeDamageResourceReplenishRate);
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(OnTakeDamageResourceReplenishRate);
 };

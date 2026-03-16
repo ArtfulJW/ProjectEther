@@ -8,6 +8,22 @@
 #include "PEPlayerCharacter.h"
 #include "PEPlayerController.h"
 
+UPEBaseGameplayAbility::UPEBaseGameplayAbility(const FObjectInitializer& ObjectInitializer):
+	Super(ObjectInitializer)
+{
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+}
+
+void UPEBaseGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnGiveAbility(ActorInfo, Spec);
+
+	if (IsValid(AbilityCooldownComponentClass) && !IsValid(AbilityCooldownComponent))
+	{
+		AbilityCooldownComponent = NewObject<UPEAbilityCooldownComponent>(this, AbilityCooldownComponentClass);
+	}
+}
+
 void UPEBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                              const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                              const FGameplayEventData* TriggerEventData)
@@ -53,7 +69,7 @@ void UPEBaseGameplayAbility::DamageHealth(APEPlayerCharacter* HitActor, FHitResu
 	// APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
 	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
 	
-	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit);
+	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit, FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
 	float DamageMultipler = DetermineDamageMultiplier(DamageDirection, HitActor);
 	AttributeSet->SetHealth(AttributeSet->GetHealth() - fAmount * DamageMultipler);
 	
@@ -65,7 +81,7 @@ void UPEBaseGameplayAbility::HealHealth(APEPlayerCharacter* HitActor, FHitResult
 	// APEPlayerCharacter* HitActor = Cast<APEPlayerCharacter>(Hit.GetActor());
 	UPEBaseCharacterAttributeSet* AttributeSet = Cast<UPEBaseCharacterAttributeSet>(HitActor->AttributeSet);
 	
-	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit);
+	EDamageDirection DamageDirection = HitActor->DetermineDamageDirection(Hit, FLinearColor(0.0f, 1.0f, 0.0f, 1.0f));
 	float DamageMultipler = DetermineDamageMultiplier(DamageDirection, HitActor);
 	AttributeSet->SetHealth(AttributeSet->GetHealth() + fAmount * DamageMultipler);
 	
