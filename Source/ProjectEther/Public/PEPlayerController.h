@@ -12,6 +12,8 @@
 #include "PEPickClassHUD.h"
 #include "PEPlayerController.generated.h"
 
+class UPEAbilityCooldownComponent;
+class UPEGameOptionsOverlay;
 class APEEquipmentCache;
 /**
  * 
@@ -57,6 +59,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* CheckCompassAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* RunAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* OptionsAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spectator")
 	TSubclassOf<ASpectatorPawn> PESpectatorPawn;
@@ -102,6 +113,14 @@ public:
 
 	UPROPERTY(Replicated)
 	bool bCanBasicAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
+	TSubclassOf<UPEGameOptionsOverlay> OptionsOverlayClass;
+
+	UPROPERTY()
+	UPEGameOptionsOverlay* GameOptionsOverlay = nullptr;
+
+	bool TempBIsReadyToExecute = true;
 	
 	void MoveEvent(const FInputActionValue& Value);
 
@@ -115,8 +134,9 @@ public:
 	
 	void UseAbilityEvent(const FInputActionValue& Value);
 
-	UFUNCTION(Server, Unreliable)
-	void ServerUseGameplayAbilityEvent(APEPlayerController* Requester, FGameplayAbilitySpecHandle AbilityHandle);
+	UFUNCTION(Server, Reliable)
+	void ServerUseGameplayAbilityEvent(APEPlayerController* Requester, FGameplayAbilitySpecHandle AbilityHandle, UAnimMontage* InAnimMontage, float
+	                                   ResourceCost, float CurrentResourceAmnt);
 
 	void UseWeaponEvent(const FInputActionValue& Value);
 
@@ -127,6 +147,10 @@ public:
 	void DeployInteractableEvent();
 
 	void CheckCompassEvent();
+
+	void JumpEvent();
+
+	void RunEvent();
 
 	UFUNCTION(Server, Reliable)
 	void ServerInteractEvent(APEPlayerController* Requester, AActor* InActor);
@@ -161,6 +185,27 @@ public:
 	void RequestTeamAssignment();
 
 	void ReplenishBasicAttack();
+
+	UFUNCTION(Server, Reliable)
+	void ServerJumpEvent();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRunEvent();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestSpectatorSpawn();
+
+	UFUNCTION(Client, Reliable)
+	void ClientProcessActivateHitIndicator(EDirectionDamageIndicator InDirectionDamageIndicator, FLinearColor InColor);
+
+	UFUNCTION()
+	void OptionsWindowEvent();
+
+	UFUNCTION(Server, Reliable)
+	void ServerCheckToPlayFPSAnimations(APEPlayerCharacter* PC, UAnimMontage* InAnimMontage, FGameplayAbilitySpecHandle AbilityHandle);
+
+	UFUNCTION(Client, Reliable)
+	void ClientPlayFPSAnim(APEPlayerCharacter* PC, UAnimMontage* InAnimMontage);
 	
 protected:
 	virtual void OnPossess(APawn* APawn) override;

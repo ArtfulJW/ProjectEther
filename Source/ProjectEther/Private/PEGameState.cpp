@@ -1,12 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PEGameState.h"
+
+#include "PEMathLibrary.h"
+#include "PEPlayerState.h"
+#include "DSP/AudioDebuggingUtilities.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 APEGameState::APEGameState():
-fEquipmentCacheSpawnDelay(5.0f)
+fEquipmentCacheSpawnDelay(5.0f),
+TeamOneEtherDeposit(nullptr),
+TeamTwoEtherDeposit(nullptr),
+CurrentSourceSpawner(nullptr),
+TeamOneNumberEtherDeposited(0),
+TeamTwoNumberEtherDeposited(0)
 {
 }
 
@@ -51,9 +60,14 @@ void APEGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(APEGameState, EtherSpawnRegion);
 	DOREPLIFETIME(APEGameState, TeamOnePlayerStart);
 	DOREPLIFETIME(APEGameState, TeamTwoPlayerStart);
+	DOREPLIFETIME(APEGameState, TeamOneEtherDeposit);
+	DOREPLIFETIME(APEGameState, TeamTwoEtherDeposit);
+	DOREPLIFETIME(APEGameState, CurrentSourceSpawner);
+	DOREPLIFETIME(APEGameState, TeamOneNumberEtherDeposited);
+	DOREPLIFETIME(APEGameState, TeamTwoNumberEtherDeposited);
 }
 
-void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
+void APEGameState::SpawnEquipmentCache_Implementation(ETeam EquipmentCacheTeam)
 {
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
@@ -83,6 +97,65 @@ void APEGameState::SpawnEquipmentCache(ETeam EquipmentCacheTeam)
 	}
 
 	 UGameplayStatics::FinishSpawningActor(SpawnedActor,SpawnTransform);
+}
+
+void APEGameState::ServerSubscribeEtherDeposit_Implementation(APEEtherDeposit* InEtherDeposit, ETeam InEtherDepositTeam)
+{
+	switch (InEtherDepositTeam)
+	{
+		case ETeam::TeamOne:
+			TeamOneEtherDeposit = InEtherDeposit;
+			break;
+		case ETeam::TeamTwo:
+			TeamTwoEtherDeposit = InEtherDeposit;
+			break;
+	}
+
+	// Force Server to immediately update values for the Client instead of waiting for the next Replication Tick
+	ForceNetUpdate();
+}
+
+ETeam APEGameState::DetermineEtherClosestTeam(float& fEtherDistanceToGoal, float& TotalDistance)
+{
+	if (!IsValid(Ether) || !IsValid(TeamOneEtherDeposit) || !IsValid(TeamTwoEtherDeposit) || !IsValid(CurrentSourceSpawner))
+	{
+		return ETeam::NoTeam;
+	}
+	
+	float fEtherDistanceToTeamOne = PEMathLibrary::EuclideanDistance(Ether->GetActorLocation(), TeamOneEtherDeposit->GetActorLocation());
+	float fEtherDistanceToTeamTwo = PEMathLibrary::EuclideanDistance(Ether->GetActorLocation(), TeamTwoEtherDeposit->GetActorLocation());
+
+	if (fEtherDistanceToTeamOne > fEtherDistanceToTeamTwo)
+	{
+		TotalDistance = PEMathLibrary::EuclideanDistance(CurrentSourceSpawner->GetActorLocation(), TeamTwoEtherDeposit->GetActorLocation());
+		fEtherDistanceToGoal = fEtherDistanceToTeamTwo;
+		return ETeam::TeamTwo;
+	}
+	else if (fEtherDistanceToTeamOne == fEtherDistanceToTeamTwo)
+	{
+		return ETeam::NoTeam;
+	}
+	else
+	{
+		TotalDistance = PEMathLibrary::EuclideanDistance(CurrentSourceSpawner->GetActorLocation(), TeamOneEtherDeposit->GetActorLocation());
+		fEtherDistanceToGoal = fEtherDistanceToTeamOne;
+		return ETeam::TeamOne;
+	}
+}
+
+void APEGameState::UpdateNumberOfEtherDeposited_Implementation(APEEtherDeposit* InEtherDeposit)
+{
+	switch (InEtherDeposit->Team)
+	{
+		case ETeam::TeamOne:
+			TeamOneNumberEtherDeposited = InEtherDeposit->NumDepositedEther;
+			return;
+		case ETeam::TeamTwo:
+			TeamTwoNumberEtherDeposited = InEtherDeposit->NumDepositedEther;
+			return;
+		case ETeam::NoTeam:
+			return;
+	}
 }
 
 TArray<APEEquipmentCache*> APEGameState::GetTeamEquipmentCacheArray(ETeam InTeam)
@@ -150,9 +223,25 @@ void APEGameState::ServerSpawnEther_Implementation()
 	{
 		return;
 	}
-	
-	int SpawningIndex = FMath::RandRange(0, EtherSpawners.Max() - 1);
-	FVector SpawnLocation = EtherSpawners[SpawningIndex]->GetActorLocation();
+
+	FVector SpawnLocation;
+	if (EtherSpawners.Num() > 0)
+	{
+		int SpawningIndex = FMath::RandRange(0, EtherSpawners.Num() - 1);
+
+		// Check for out of index errors
+		if (EtherSpawners.Num() == 0 || SpawningIndex < 0 || SpawningIndex > EtherSpawners.Num() - 1)
+		{
+			// No EtherSpawner location provided, default to SpawnRegion's location
+			UE_LOG(LogTemp, Warning, TEXT("SpawningIndex out of bounds"))
+			SpawnLocation = EtherSpawnRegion->GetActorLocation();
+		}
+		else
+		{
+			CurrentSourceSpawner = EtherSpawners[SpawningIndex];
+			SpawnLocation = CurrentSourceSpawner->GetActorLocation();
+		}
+	}
 
 	if (!Ether)
 	{
@@ -271,6 +360,7 @@ void APEGameState::ServerAssignPlayerToTeam_Implementation(APEPlayerController* 
 	for (APlayerState* PlayerState : this->PlayerArray)
 	{
 		APEPlayerController* CachedPC = Cast<APEPlayerController>(PlayerState->GetPlayerController());
+		APEPlayerState* CachedPlayerState = Cast<APEPlayerState>(CachedPC->GetPlayerState<APEPlayerState>());
 		if (CachedPC != Requester)
 		{
 			x++;
@@ -285,7 +375,8 @@ void APEGameState::ServerAssignPlayerToTeam_Implementation(APEPlayerController* 
 		{
 			CachedPC->Team = ETeam::TeamTwo;
 		}
-		
+
+		CachedPlayerState->ServerSetTagname(FText::FromString(ETeam_ToString(CachedPC->Team)));
 		x++;
 	}
 }

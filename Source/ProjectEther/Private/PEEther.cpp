@@ -10,6 +10,8 @@ APEEther::APEEther():
 fPulseRate(5.0f),
 bIsDeposited(false)
 {
+	bAlwaysRelevant = true;
+	SetNetCullDistanceSquared(425000000.0);
 }
 
 // Called when the game starts or when spawned
@@ -36,13 +38,17 @@ void APEEther::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APEEther::Interact()
+void APEEther::Interact(APEPlayerCharacter& InteractingPlayerCharacter)
 {
 	if (bIsDeposited)
 	{
 		return;
 	}
 
+	ApplyCarryEffect();
+	InteractingPlayerCharacter.CarriedInteractableActor = this;
+	MulticastSetSimulatePhysics(false);
+	
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 

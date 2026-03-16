@@ -26,6 +26,8 @@ public:
 	
 	virtual void Deploy() override;
 
+	virtual void Interact(APEPlayerCharacter& InteractingPlayerCharacter) override;
+
 	void SpawnPlayer(APEPlayerController* Requester);
 	
 	UPROPERTY(Replicated)
@@ -34,6 +36,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	int NumRevives;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
+	UStaticMesh* OpenedEquipmentCache;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Cache Specs")
 	TSubclassOf<APEPlayerCharacter> PlayerCharacter;
 

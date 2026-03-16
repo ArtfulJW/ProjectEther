@@ -19,3 +19,13 @@ float PEMathLibrary::SignedDistanceFieldBox(const FVector& Point, const FVector&
 	
 	return fPositiveLengthFromEdge + FMath::Min(fClosestNegativeDistance, 0.0f);
 }
+
+float PEMathLibrary::EuclideanDistance(const FVector& VectorOne, const FVector& VectorTwo)
+{
+	return (VectorOne - VectorTwo).Size();
+}
+
+FVector PEMathLibrary::MidpointVector(const FVector& VectorOne, const FVector& VectorTwo)
+{
+	return FVector((VectorOne.X + VectorTwo.X)/2, (VectorOne.Y + VectorTwo.Y)/2, (VectorOne.Z + VectorTwo.Z)/2);
+}

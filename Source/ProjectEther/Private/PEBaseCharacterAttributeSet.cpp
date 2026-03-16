@@ -9,15 +9,19 @@ void UPEBaseCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, MaxHealth);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, Health);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, Speed);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, AttackSpeed);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, AbilityCostMultiplier);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, CooldownMultiplier);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionFront);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionSide);
-	DOREPLIFETIME(UPEBaseCharacterAttributeSet, DamageDirectionBack);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, Health, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, Speed, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, AttackSpeed, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, AbilityCostMultiplier, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, CooldownMultiplier, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionFront, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionSide, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionBack, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, JumpMagnitude, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, Resource, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, ResourceMaxValue, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPEBaseCharacterAttributeSet, ResourceReplenishRate, COND_None, REPNOTIFY_Always);
 }
 
 void UPEBaseCharacterAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
@@ -42,6 +46,17 @@ void UPEBaseCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& Ol
 	}
 	
 	HealthBarWidget->ServerUpdateHealthBar(PlayerCharacter->AttributeSet);
+
+	// TODO: Update personal Health bar here
+	if (IsValid(PlayerCharacter->PlayerHUD))
+	{
+		PlayerCharacter->PlayerHUD->UpdateHUDHealthBar(PlayerCharacter->AttributeSet);
+	}
+
+	if (Health.GetCurrentValue() <= 0.0f)
+	{
+		PlayerCharacter->ClientCleanupClientWeapon();
+	}
 }
 
 void UPEBaseCharacterAttributeSet::OnRep_Speed(const FGameplayAttributeData& OldSpeed)
@@ -79,6 +94,68 @@ void UPEBaseCharacterAttributeSet::OnRep_DamageDirectionBack(const FGameplayAttr
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, DamageDirectionBack, OldDamageDirectionBack);
 }
 
+void UPEBaseCharacterAttributeSet::OnRep_JumpMagnitude(const FGameplayAttributeData& OldJumpMagnitude)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, JumpMagnitude, OldJumpMagnitude);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_Resource(const FGameplayAttributeData& OldResource)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, Resource, OldResource);
+
+	APEPlayerCharacter* PlayerCharacter = Cast<APEPlayerCharacter>(GetOuter());
+	if (!IsValid(PlayerCharacter))
+	{
+		return;
+	}
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_ResourceReplenishRate(const FGameplayAttributeData& OldResourceReplenishRate)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, ResourceReplenishRate, OldResourceReplenishRate);
+}
+
+void UPEBaseCharacterAttributeSet::OnRep_ResourceMaxValue(const FGameplayAttributeData& OldResourceMaxValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPEBaseCharacterAttributeSet, ResourceMaxValue, OldResourceMaxValue);
+}
+
+void UPEBaseCharacterAttributeSet::SetResource_Implementation(float InAmount)
+{
+	if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+	{
+		ASC->SetNumericAttributeBase(GetResourceAttribute(), FMath::Clamp(InAmount, 0.0f, GetResourceMaxValue()));
+	}
+	
+	// APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
+	// if (InAmount >= PC->AttributeSet->GetResourceMaxValue())
+	// {
+	// 	Resource = PC->AttributeSet->GetResourceMaxValue();
+	// }
+	// else
+	// {
+	// 	Resource = InAmount;
+	// }
+}
+
+void UPEBaseCharacterAttributeSet::AddResource_Implementation(float InAmount)
+{
+	if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+	{
+		ASC->SetNumericAttributeBase(GetResourceAttribute(), FMath::Clamp(GetResource() + InAmount, 0.0f, GetResourceMaxValue()));
+	}
+	
+	// APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
+	// if (PC->AttributeSet->GetResource() + InAmount >= PC->AttributeSet->GetResourceMaxValue())
+	// {
+	// 	Resource = PC->AttributeSet->GetResourceMaxValue();
+	// }
+	// else
+	// {
+	// 	Resource = PC->AttributeSet->GetResource() + InAmount;
+	// }
+}
+
 void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 {
 	APEPlayerCharacter* PC = Cast<APEPlayerCharacter>(GetOwningActor());
@@ -93,6 +170,8 @@ void UPEBaseCharacterAttributeSet::SetHealth_Implementation(float InHealth)
 
 	if (Health.GetCurrentValue() <= 0.0f)
 	{
+		Health = 0.0f;
+		OnRep_Health(Health);
 		PC->BeforeDestroy();
 		PC->Destroy();
 	}

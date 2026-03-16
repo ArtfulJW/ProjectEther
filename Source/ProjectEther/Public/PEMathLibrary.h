@@ -18,4 +18,8 @@ public:
 	 * \n https://iquilezles.org/articles/distfunctions/
 	 */
 	static float SignedDistanceFieldBox(const FVector& Point, const FVector& Box);
+
+	static float EuclideanDistance(const FVector& VectorOne, const FVector& VectorTwo);
+
+	static FVector MidpointVector(const FVector& VectorOne, const FVector& VectorTwo);
 };

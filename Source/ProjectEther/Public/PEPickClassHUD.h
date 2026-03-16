@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pick Class HUD")
 	TObjectPtr<UButton> PriestClassButton;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pick Class HUD")
+	TObjectPtr<UButton> SpectatorPawnButton;
+
 	UFUNCTION()
 	void SetBerserkerClassAndRequestSpawn();
 
@@ -37,4 +40,7 @@ public:
 
 	UFUNCTION()
 	void SetPriestClassAndRequestSpawn();
+
+	UFUNCTION()
+	void SelectSpectatorPawnAndRequestSpawn();
 };

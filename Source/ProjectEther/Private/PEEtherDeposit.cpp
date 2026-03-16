@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PEEtherDeposit.h"
-
 #include "PEEther.h"
 #include "PEGameMode.h"
 #include "PEGameState.h"
@@ -10,17 +9,20 @@
 
 // Sets default values
 APEEtherDeposit::APEEtherDeposit():
-NumDepositedEther(0)
+NumDepositedEther(0),
+HomeIconWidgetComponent(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bNetLoadOnClient = true;
 	
 	EtherDepositOne = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit One"));
 	EtherDepositTwo = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit Two"));
 	EtherDepositThree = CreateDefaultSubobject<USceneComponent>(TEXT("Ether Deposit Three"));
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	StaticMeshComponent =  CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	HomeIconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HomeIconWidgetComponent"));
 
 	RootComponent = StaticMeshComponent;
 	
@@ -28,6 +30,7 @@ NumDepositedEther(0)
 	EtherDepositTwo->SetupAttachment(RootComponent);
 	EtherDepositThree->SetupAttachment(RootComponent);
 	BoxComponent->SetupAttachment(RootComponent);
+	HomeIconWidgetComponent->SetupAttachment(RootComponent);
 
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APEEtherDeposit::DepositEther);
 }
@@ -56,6 +59,21 @@ void APEEtherDeposit::BeginPlay()
 	{
 		EtherDepositSceneComponents.Add(EtherDepositThree);
 	}
+
+	if (IsValid(HomeIconWidgetClass))
+	{
+		// HomeIconWidgetComponent->SetDrawAtDesiredSize(true);
+		HomeIconWidgetComponent->SetWidgetClass(HomeIconWidgetClass);
+		HomeIconWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		HomeIconWidgetComponent->InitWidget();
+
+		UPEEtherDepositHomeIconWidget* HomeIconWidget = Cast<UPEEtherDepositHomeIconWidget>(HomeIconWidgetComponent->GetWidget());
+		if (!IsValid(HomeIconWidget))
+		{
+			return;
+		}
+		HomeIconWidget->HomeIconBorder->SetBrushColor(ETeam_GetTeamColor(Team).GetSpecifiedColor());
+	}
 }
 
 // Called every frame
@@ -69,6 +87,22 @@ void APEEtherDeposit::Destroyed()
 	Super::Destroyed();
 	
 	BoxComponent->OnComponentBeginOverlap.RemoveDynamic(this, &APEEtherDeposit::DepositEther);
+}
+
+void APEEtherDeposit::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (HasAuthority())
+	{
+		APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(this));
+		if (!IsValid(GameState))
+		{
+			return;
+		}
+		GameState->ServerSubscribeEtherDeposit(this, Team);
+		GameState->ForceNetUpdate();
+	}
 }
 
 void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp,
@@ -132,6 +166,7 @@ void APEEtherDeposit::DepositEther(UPrimitiveComponent* OverlappedComp, AActor* 
 	GameState->SpawnEquipmentCache(PlayerController->Team);
 
 	NumDepositedEther++;
+	GameState->UpdateNumberOfEtherDeposited(this);
 	ServerCheckEndGame();
 }
 

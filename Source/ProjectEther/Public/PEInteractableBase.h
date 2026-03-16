@@ -23,14 +23,16 @@ public:
 	virtual ~APEInteractableBase() override;
 	
 	virtual void Tick(float DeltaSeconds) override;
-		
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider")
 	USphereComponent* SphereColliderComponent;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	APEPlayerCharacter* Carrier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Gameplay Effect")
@@ -46,7 +48,7 @@ public:
 
 	virtual void RemoveCarryEffect();
 
-	virtual void Interact() override;
+	virtual void Interact(APEPlayerCharacter& InteractingPlayerCharacter) override;
 
 	virtual void Deploy() override;
 
