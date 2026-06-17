@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PEMainMenuHUD.h"
+#include "Camera/CameraComponent.h"
 #include "Components/Button.h"
 #include "GameFramework/Actor.h"
 #include "PEMainMenuPawn.generated.h"
@@ -24,6 +25,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Main Menu Actor")
+	UCameraComponent* CameraComponent;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Main Menu HUD")
 	TSubclassOf<UPEMainMenuHUD> MainMenuHUDClass;
 

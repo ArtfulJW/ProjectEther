@@ -36,6 +36,11 @@ void APEEther::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLi
 void APEEther::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (GetTransform().GetLocation().Z < DeathFloor)
+	{
+		ServerDestroyEther();
+	}
 }
 
 void APEEther::Interact(APEPlayerCharacter& InteractingPlayerCharacter)
@@ -50,6 +55,15 @@ void APEEther::Interact(APEPlayerCharacter& InteractingPlayerCharacter)
 	MulticastSetSimulatePhysics(false);
 	
 	AttachToComponent(Carrier->CarrySceneComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+void APEEther::ServerDestroyEther_Implementation()
+{
+	Destroy();
+	
+	APEGameState* GameState = Cast<APEGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	GameState->ServerClearEther();
+	GameState->ServerSpawnEther();
 }
 
 void APEEther::ServerSetIsDeposited_Implementation(bool InBool)
