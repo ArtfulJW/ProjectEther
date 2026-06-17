@@ -2,6 +2,7 @@
 
 #include "PEMainMenuHUD.h"
 
+#include "Components/EditableTextBox.h"
 #include "Kismet/GameplayStatics.h"
 
 UPEMainMenuHUD::UPEMainMenuHUD(const FObjectInitializer& ObjectInitializer): UUserWidget(ObjectInitializer)
@@ -36,8 +37,8 @@ void UPEMainMenuHUD::TravelToMainGame()
 	// UGameplayStatics::OpenLevel(World, FName("MinimalMap.MinimalMap"), true, FString("?listen"));
 
 	// World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MinimalMap.MinimalMap'"), true);
-
-	PlayerController->ClientTravel("127.0.0.1", TRAVEL_Absolute);
+	FString IP = IPTextBox->Text.ToString().TrimStartAndEnd();
+	PlayerController->ClientTravel(IP, TRAVEL_Absolute);
 
 	// ServerRequestTravel();
 	

@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "PEMainMenuHUD.generated.h"
 
+class UEditableTextBox;
 /**
  * 
  */
@@ -25,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Main Menu HUD")
 	TObjectPtr<UButton> PlayButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD")
+	TObjectPtr<UEditableTextBox> IPTextBox;
 	
 	UFUNCTION()
 	void TravelToMainGame();

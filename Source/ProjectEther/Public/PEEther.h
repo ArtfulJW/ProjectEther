@@ -39,9 +39,15 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Ether Specs")
 	bool bIsDeposited;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ether Specs")
+	float DeathFloor = -2000.0f;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEtherPulse();
 
-	 UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable)
 	void ServerSetIsDeposited(bool InBool);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDestroyEther();
 };

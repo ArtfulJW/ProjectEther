@@ -4,6 +4,8 @@
 #include "PEEther.h"
 #include "PEGameMode.h"
 #include "PEGameState.h"
+#include "GameFramework/GameSession.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -183,6 +185,13 @@ void APEEtherDeposit::ServerCheckEndGame_Implementation()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Game is ready to end"));
 		// World->ServerTravel(FString("/Script/Engine.World'/Game/Maps/MainMenuMap.MainMenuMap"));
-		UGameplayStatics::OpenLevel(this, FName(*World->GetName()), false);
+		// UGameplayStatics::OpenLevel(this, FName(*World->GetName()), false);
+
+		for (TObjectPtr<APlayerState> ConnectedPlayer: GameMode->GameState->PlayerArray)
+		{
+			GameMode->GameSession->KickPlayer(ConnectedPlayer->GetPlayerController(), FText::FromString("Game Over"));
+		}
+
+		UGameplayStatics::OpenLevel(this, FName("PL_Hotpot"), false);
 	}
 }
